@@ -1,45 +1,28 @@
 :root {
-  font-family:Arial,Helvetica,sans-serif;
-  color:#e9e5d9;
-  background:#091923;
-  font-synthesis:none;
-  text-rendering:optimizeLegibility;
-  -webkit-font-smoothing:antialiased;
-  font-size:14px;
-  line-height:1.6
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #ebe7dc;
+  background: #091923;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.65;
+  --navy: #0b1d28;
+  --panel: #102631;
+  --cream: #ebe7dc;
+  --muted: #a4b5be;
+  --gold: #cfaf77;
+  --line: #bda36730;
 }
-* {
-  box-sizing:border-box
-}
-body {
-  margin:0;
-  min-width:320px
-}
-button {
-  font:inherit;
-  cursor:pointer;
-  color:inherit;
-  border-radius:0
-}
-a {
-  color:inherit
-}
-button,a {
-  touch-action:manipulation
-}
-button:focus-visible,a:focus-visible {
-  outline:3px solid #e4be72;
-  outline-offset:4px
-}
-h1,h2,h3,p {
-  margin:0
-}
-h1,h2,h3 {
-  font-family:Georgia,'Times New Roman',serif;
-  font-weight:400
-}
-::selection {
-  background:#b89654;
-  color:#071923
-}
-
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button { font: inherit; cursor: pointer; color: inherit; border-radius: 2px; }
+button, a { touch-action: manipulation; }
+a { color: inherit; }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid #edcb8b; outline-offset: 4px; }
+button:disabled { opacity: .42; cursor: not-allowed; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
+summary { cursor: pointer; }
+[hidden] { display: none !important; }
+::selection { background: #c5a66f; color: #0b1d28; }

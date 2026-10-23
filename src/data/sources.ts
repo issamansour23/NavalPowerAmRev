@@ -10,6 +10,10 @@ export interface SourceReference {
     documentUrl: string;
     imageCredits: string;
     citation: string;
+    rights?: string;
+    linkedMechanicIds?: string[];
+    quotation?: string;
+    notes?: string;
 }
 
 export const sources: SourceReference[] = [];
