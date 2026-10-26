@@ -1,26 +1,49 @@
-import type { Action, GameState, Position, Unit } from '../game/types';
-import { same } from '../game/board';
-import { ShipArt } from './ShipArt';
-export function GameBoard({ state, selected, actions, onSelect, onMove, onAttack }: {
-  state: GameState; selected: Unit | undefined; actions: Action[];
-  onSelect: (unit: Unit) => void; onMove: (position: Position) => void; onAttack: (id: string) => void;
+import { useRef } from 'react';
+import { SIZE, shipDefinition } from '../battleship/config';
+import { coordinate, same } from '../battleship/placement';
+import type { CellView, Position, Side } from '../battleship/types';
+
+export function GameBoard({ side, cells, enabled, placing, preview, previewValid, onChoose, onHover }: {
+  side: Side;
+  cells: CellView[];
+  enabled: boolean;
+  placing: boolean;
+  preview: Position[];
+  previewValid: boolean;
+  onChoose: (position: Position) => void;
+  onHover?: (position: Position | null) => void;
 }) {
-  return <div className="board-frame" role="region" aria-label="Battlefield chart — scroll horizontally on smaller screens" tabIndex={0}><div className="board"><div />{'ABCDEFGHIJKL'.split('').map(c => <span className="coordinate" key={c}>{c}</span>)}
-    {Array.from({ length: 12 }, (_, y) => <div className="row" key={y}><span className="coordinate">{y + 1}</span>{Array.from({ length: 12 }, (_, x) => {
-      const position: Position = [x, y];
-      const tile = state.scenario.tiles.find(t => same(t.position, position));
-      const unit = state.units.find(u => u.status === 'active' && same(u.position, position));
-      const move = actions.some(a => a.type === 'move' && same(a.to, position));
-      const attack = unit && actions.some(a => a.type === 'attack' && a.targetId === unit.id);
-      const beacon = same(position, state.scenario.objective);
-      return <div className={`cell ${tile?.type === 'land' ? 'coast' : ''} ${beacon ? 'beacon' : ''}`} key={x}>
-        {tile?.type === 'port' && <span className="port">◇<small>Mock port · AM</small></span>}
-        {beacon && <span className="beacon-label">◎<small>Demo beacon</small></span>}
-        {move && <button className="move-target" aria-label={`Move to ${'ABCDEFGHIJKL'[x]}${y + 1}`} onClick={() => onMove(position)}>·</button>}
-        {unit && <button aria-label={`${unit.name}, ${'ABCDEFGHIJKL'[x]}${y + 1}, HP ${unit.hp}/${unit.maxHp}${attack ? ', attack target' : ''}`} aria-pressed={selected?.id === unit.id}
-          className={`unit ${unit.owner} ${selected?.id === unit.id ? 'selected' : ''} ${attack ? 'attack-target' : ''}`}
-          onClick={() => attack ? onAttack(unit.id) : onSelect(unit)}><ShipArt /><small>{unit.owner === 'american' ? 'AM' : 'GB'} {unit.hp}/{unit.maxHp}</small></button>}
-      </div>;
-    })}</div>)}
-  </div><div className="board-caption"><span>◇ Mock port · ◎ Demo objective</span><span>Provisional chart · Full visibility</span></div></div>;
+  const buttons = useRef<(HTMLButtonElement | null)[]>([]);
+  return <div className={`fleet-grid-frame ${side}`} role="region" aria-label={`${side === 'american' ? 'American Fleet' : 'British Waters'} chart`}>
+    <div className="fleet-grid" onMouseLeave={() => onHover?.(null)}>
+      <span />{'ABCDEFGHIJ'.split('').map(letter => <span key={letter} className="fleet-coordinate">{letter}</span>)}
+      {Array.from({ length: SIZE }, (_, y) => <div className="fleet-row" key={y}>
+        <span className="fleet-coordinate">{y + 1}</span>
+        {cells.slice(y * SIZE, (y + 1) * SIZE).map((cell, x) => {
+          const pending = preview.some(p => same(p, cell.position));
+          const available = enabled && (placing || !cell.shot);
+          const status = cell.sunk ? 'sunk ship' : cell.shot === 'hit' ? 'hit' : cell.shot === 'miss' ? 'miss' : cell.ship ? shipDefinition(cell.ship).label : side === 'british' ? 'unexplored water' : 'water';
+          return <button key={x} ref={element => { buttons.current[y * SIZE + x] = element; }}
+            className={`fleet-cell ${cell.ship ? 'friendly-or-revealed' : ''} ${cell.shot ?? ''} ${cell.sunk ? 'sunk' : ''} ${pending ? previewValid ? 'placement-preview' : 'placement-invalid' : ''}`}
+            aria-label={`${coordinate(cell.position)}, ${status}${placing ? ', place ship here' : available ? ', attack here' : ''}`}
+            disabled={!available} onClick={() => onChoose(cell.position)}
+            onMouseEnter={() => onHover?.(cell.position)} onFocus={() => onHover?.(cell.position)}
+            onKeyDown={event => {
+              const delta = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+              if (!delta) return;
+              event.preventDefault();
+              let nx = x + delta[0], ny = y + delta[1];
+              while (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE) {
+                const next = buttons.current[ny * SIZE + nx];
+                if (next && !next.disabled) { next.focus(); break; }
+                nx += delta[0]; ny += delta[1];
+              }
+            }}>
+            {cell.sunk || cell.shot === 'hit' ? <span aria-hidden="true">×</span> : cell.shot === 'miss' ? <span aria-hidden="true">•</span> : cell.ship ? <span className="ship-segment" aria-hidden="true" /> : null}
+          </button>;
+        })}
+      </div>)}
+    </div>
+    <div className="fleet-chart-caption"><span>A–J / 1–10</span><span>{side === 'american' ? 'Your fleet positions' : 'Enemy positions concealed until hit or game over'}</span></div>
+  </div>;
 }

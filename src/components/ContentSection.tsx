@@ -8,7 +8,7 @@ export function ContentSection({ content, number, citationPlaceholder }: {
 }) {
     return <article>
         <span>{String(number).padStart(2, '0')}</span>
-        <div><h2>{content.title}</h2><p>{content.text}</p>
+        <div><h2>{content.title}</h2>{content.text && <p>{content.text}</p>}
             {citationPlaceholder && <p>{citationPlaceholder}</p>}
         </div>
     </article>;
