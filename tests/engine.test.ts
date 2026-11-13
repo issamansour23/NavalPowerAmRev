@@ -64,7 +64,7 @@ test('enemy orders, allied attacks, self attacks and out-of-range attacks are re
   assert.equal(applyAction(s, { type: 'attack', unitId: a.id, targetId: a.id }), s);
   b.owner = 'french';
   assert.equal(applyAction(s, { type: 'attack', unitId: a.id, targetId: b.id }), s);
-  assert.equal(applyAction(s, { type: 'move', unitId: b.id, to: [5, 4] }), s);
+  assert.notEqual(applyAction(s, { type: 'move', unitId: b.id, to: [5, 4] }), s);
   b.owner = 'british'; b.position = [10, 10];
   assert.equal(applyAction(s, { type: 'attack', unitId: a.id, targetId: b.id }), s);
 });

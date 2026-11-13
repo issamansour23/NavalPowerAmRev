@@ -1,69 +1,61 @@
 import { useEffect, useReducer, useState } from 'react';
-import { GameBoard } from '../components/GameBoard';
-import { SHIPS } from '../battleship/config';
-import { createGame, gameReducer, isSunk, nextShip, remaining } from '../battleship/engine';
-import { canPlace, coordinate, shipCells, validFleet } from '../battleship/placement';
-import { boardView } from '../battleship/view';
-import type { Position, Side } from '../battleship/types';
-import { gameplayNote, upcomingNote } from '../data/gameContent';
-import '../battleship/battleship.css';
-
-function newSeed() { return crypto.getRandomValues(new Uint32Array(1))[0]; }
+import { CampaignBoard } from '../components/CampaignBoard';
+import { ShipArt } from '../components/ShipArt';
+import { createCampaign, campaignReducer } from '../campaign/reducer';
+import { engagements } from '../campaign/scenarios';
+import { futureAbilities, scoring } from '../campaign/config';
+import { getLegalActions } from '../game/rules';
+import { stats } from '../game/config';
+import { classification, isAlive, isCombatant, sideOf } from '../game/units';
+import type { Action } from '../game/types';
+import '../campaign/campaign.css';
 
 export function Battlefield() {
-  const [state, dispatch] = useReducer(gameReducer, undefined, () => createGame(newSeed()));
-  const [hover, setHover] = useState<Position | null>(null);
-  const [placementError, setPlacementError] = useState('');
-  const [confirmNew, setConfirmNew] = useState(false);
-  const pending = nextShip(state);
-  const placing = state.phase === 'placement';
-  const ready = validFleet(state.boards.american.ships);
-  const preview = placing && pending && hover ? shipCells(pending.class, hover, state.orientation) : [];
-  const previewValid = !!(pending && hover && canPlace(state.boards.american.ships, pending.class, hover, state.orientation));
+  const [campaign, dispatch] = useReducer(campaignReducer, undefined, () => createCampaign());
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mode, setMode] = useState<'move' | 'attack' | null>(null);
+  const [confirm, setConfirm] = useState<'engagement' | 'campaign' | null>(null);
+  const game = campaign.game;
+  const definition = engagements[campaign.engagementIndex];
+  const selected = game.units.find(u => u.id === selectedId);
+  const playerTurn = campaign.status === 'playing' && game.phase === 'american';
+  const legal = playerTurn ? getLegalActions(game).filter(a => a.unitId === selectedId) : [];
+  const actions = legal.filter(a => a.type === mode);
+  const latest = campaign.results.at(-1);
   useEffect(() => {
-    if (state.phase !== 'british') return;
-    const timer = window.setTimeout(() => dispatch({ type: 'computer', matchId: state.matchId, turnNumber: state.turnNumber }), 650);
+    if (campaign.status !== 'playing' || (game.phase !== 'british' && game.phase !== 'operations')) return;
+    const timer = window.setTimeout(() => dispatch({ type: game.phase === 'british' ? 'ai-step' : 'resolve', revision: campaign.revision }), 250);
     return () => window.clearTimeout(timer);
-  }, [state.phase, state.matchId, state.turnNumber]);
-  function reset() {
-    dispatch({ type: 'new-game', seed: newSeed() });
-    setHover(null); setPlacementError(''); setConfirmNew(false);
+  }, [campaign.status, campaign.revision, game.phase]);
+  function order(action: Action) {
+    dispatch({ type: 'order', action, revision: campaign.revision }); setMode(null);
   }
-  function place(position: Position) {
-    if (!pending) return;
-    if (!canPlace(state.boards.american.ships, pending.class, position, state.orientation)) {
-      setPlacementError(`Cannot place ${pending.label} at ${coordinate(position)}. Keep every square inside the grid and clear of other ships.`);
-      return;
-    }
-    dispatch({ type: 'place', position }); setPlacementError(''); setHover(null);
-  }
-  const turnLabel = placing ? 'Fleet placement' : state.phase === 'american' ? 'Your turn' : state.phase === 'british' ? 'British turn' : state.winner === 'american' ? 'Victory' : 'Defeat';
-  return <section className="page battleship-page">
-    <div className="page-heading"><div><p className="eyebrow">REVOLUTION AT SEA</p><h1>{placing ? 'Prepare your fleet' : 'The battle at sea'}</h1><p>{placing ? 'Place three American vessels, then enter British Waters.' : 'Choose one unexplored square. Sink the enemy fleet to win.'}</p></div>
-      <div className="turn" aria-live="polite"><small>{placing ? 'PREPARATION' : state.winner ? 'BATTLE COMPLETE' : `TURN ${Math.ceil(state.turnNumber / 2)}`}</small><strong>{turnLabel}</strong><small>{placing ? `${state.boards.american.ships.length} of 3 ships placed` : state.phase === 'british' ? 'Opponent is choosing a coordinate…' : state.winner ? 'Both fleets now revealed' : 'One attack per turn'}</small></div></div>
-    <div className="battle-status-bar"><div className="american"><span className="status-dot" /> American Fleet <strong>{placing ? state.boards.american.ships.length : remaining(state.boards.american)} / 3</strong><small>{placing ? 'placed' : 'afloat'}</small></div><div className="british"><span className="status-dot" /> British Fleet <strong>{remaining(state.boards.british)} / 3</strong><small>afloat</small></div><button className="secondary" onClick={() => placing ? reset() : setConfirmNew(true)}>New Game</button></div>
-    {confirmNew && <div className="notice" role="alert"><p>Start a new game? Current placements and attacks will be cleared.</p><button className="primary" onClick={reset}>Confirm New Game</button> <button className="secondary" onClick={() => setConfirmNew(false)}>Keep Playing</button></div>}
-    {state.winner && <section className="result" role="status"><p className="eyebrow">BATTLE COMPLETE</p><h2>{state.winner === 'american' ? 'Victory at sea' : 'Your fleet has been sunk'}</h2><p>{state.winner === 'american' ? 'Every British vessel has been sunk. The American fleet wins.' : 'Every American vessel has been sunk. The British fleet wins.'}</p><button className="primary" onClick={reset}>Play Again</button></section>}
-    {placing && <section className="placement-panel" aria-label="Ship placement controls">
-      <div className="placement-heading"><div><p className="eyebrow">FLEET DEPLOYMENT</p><h2>{pending ? `Place your ${pending.label}` : 'Your fleet is ready'}</h2><p>{pending ? `${pending.length} squares · ${state.orientation}. Select a starting square on your chart.` : 'All three vessels are placed. Start Game when ready.'}</p></div><button className="primary" disabled={!ready} onClick={() => { setHover(null); dispatch({ type: 'start' }); }}>Start Game <span aria-hidden="true">→</span></button></div>
-      <ol className="placement-roster">{SHIPS.map(ship => {
-        const placed = state.boards.american.ships.some(s => s.class === ship.class);
-        return <li key={ship.class} className={placed ? 'placed' : pending?.class === ship.class ? 'current' : ''} aria-current={pending?.class === ship.class ? 'step' : undefined}><span>{placed ? '✓' : String(SHIPS.indexOf(ship) + 1).padStart(2, '0')}</span><div><strong>{ship.label}</strong><small>{ship.length} squares · {placed ? 'Placed' : pending?.class === ship.class ? 'Place now' : 'Next'}</small></div><div className="length-mark" aria-hidden="true">{Array.from({ length: ship.length }, (_, i) => <i key={i} />)}</div></li>;
-      })}</ol>
-      <div className="placement-actions"><button className="secondary" disabled={ready} onClick={() => { dispatch({ type: 'rotate' }); setPlacementError(''); }}>Orientation: {state.orientation === 'horizontal' ? 'Horizontal' : 'Vertical'} ↻</button><button className="secondary" onClick={() => { dispatch({ type: 'randomize' }); setHover(null); setPlacementError(''); }}>Randomize Fleet</button><button className="text-button" disabled={!state.boards.american.ships.length} onClick={() => { dispatch({ type: 'clear-placement' }); setHover(null); setPlacementError(''); }}>Clear Placement</button></div>
-      <p className="placement-feedback" role="status">{placementError || 'Ships may touch, but cannot overlap or extend beyond the chart.'}</p>
+  function resetSelection() { setSelectedId(null); setMode(null); }
+  const unitsLeft = (side: 'american' | 'british') => game.units.filter(u => sideOf(u.owner) === side && isAlive(u) && isCombatant(u)).length;
+  return <section className="page campaign-page">
+    <div className="page-heading"><div><p className="eyebrow">THREE-ROUND CAMPAIGN · ROUND {definition.number} OF 3</p><h1>{definition.location}</h1><p>{definition.theme}{definition.portBattle && <span className="port-battle-tag">PORT BATTLE</span>}</p></div><div className="campaign-score"><small>CAMPAIGN SCORE</small><strong>{campaign.score}</strong><small>Provisional game points</small></div></div>
+    <ol className="campaign-overview" aria-label="Campaign engagements">{engagements.map((engagement, i) => {
+      const result = campaign.results.find(r => r.number === engagement.number);
+      return <li key={engagement.number} className={i === campaign.engagementIndex ? 'current' : ''} aria-current={i === campaign.engagementIndex ? 'step' : undefined}><span>0{engagement.number}</span><div><strong>{engagement.location}</strong><small>{result ? result.outcome : i === campaign.engagementIndex ? 'Current engagement' : 'Upcoming'}</small></div></li>;
+    })}</ol>
+    <div className="game-toolbar"><div className="mission-brief"><span className="eyebrow">TESTING OBJECTIVE</span><p>{definition.objectiveText}</p><small>At turn {game.scenario.roundLimit}, more remaining combat hull wins; equal hull is a draw. Merchants do not count.</small></div><button className="secondary" onClick={() => setConfirm('engagement')}>Restart Engagement</button><button className="secondary" onClick={() => setConfirm('campaign')}>Restart Campaign</button></div>
+    <details className="prototype-disclosure"><summary>About the testing rules</summary><p>Fleet sizes, positions, hull, movement, damage, turn limits, and scores are game fixtures, not historical findings. The three locations and themes are scenario labels. Attacks use Manhattan range and ignore intervening terrain and ships. All fleets are visible. No special abilities are active.</p><p>Scoring: +{scoring.engagementWin} for a win, +{scoring.britishWarshipSunk} per British warship sunk, and +{scoring.chesapeakeWinBonus} for a Round 3 win. Fresh fleets start each engagement; scores carry forward. Restart Engagement discards only that engagement's points.</p></details>
+    {confirm && <div className="notice" role="alert"><p>{confirm === 'campaign' ? 'Restart the whole campaign? All results and points will be cleared.' : 'Restart this engagement? Its points and result will be cleared. Earlier results will stay.'}</p><button className="primary" onClick={() => { dispatch({ type: confirm === 'campaign' ? 'restart-campaign' : 'restart-engagement' }); resetSelection(); setConfirm(null); }}>Confirm Restart</button> <button className="secondary" onClick={() => setConfirm(null)}>Cancel</button></div>}
+    {campaign.status !== 'playing' && latest && <section className="result" role="status"><p className="eyebrow">{campaign.status === 'complete' ? 'CAMPAIGN COMPLETE' : `ROUND ${definition.number} RESULTS`}</p><h2>{campaign.status === 'complete' ? 'Final campaign results' : latest.outcome === 'victory' ? 'Engagement won' : latest.outcome === 'defeat' ? 'Engagement lost' : 'Engagement drawn'}</h2><p>{latest.reason}</p><p>This engagement: {latest.score} points ({latest.sinkPoints} from warships, {latest.winPoints} from victory, {latest.bonus} bonus). Campaign total: {campaign.score}.</p>
+      {campaign.status === 'engagement-results' ? <button className="primary" onClick={() => { dispatch({ type: 'continue', revision: campaign.revision }); resetSelection(); }}>Continue to Next Engagement</button> : <><div className="campaign-results-table"><table><caption>Performance across all three engagements</caption><thead><tr><th scope="col">Round</th><th scope="col">Location</th><th scope="col">Outcome</th><th scope="col">Warships sunk</th><th scope="col">Points</th></tr></thead><tbody>{campaign.results.map(result => <tr key={result.number}><td>{result.number}</td><td>{result.location}</td><td>{result.outcome}</td><td>{result.sunkWarships.length}</td><td>{result.score}</td></tr>)}</tbody></table></div><button className="primary" onClick={() => setConfirm('campaign')}>Play Campaign Again</button></>}
     </section>}
-    <div className="battle-announcement" role="status" aria-live="polite">{state.log.at(-1)}</div>
-    <div className="fleet-boards">{(['american', 'british'] as Side[]).map(side => <section className={`fleet-section ${side}`} key={side}>
-      <div className="fleet-section-heading"><div><p className="eyebrow">{side === 'american' ? 'FRIENDLY WATERS' : 'ENEMY WATERS'}</p><h2>{side === 'american' ? 'American Fleet' : 'British Waters'}</h2></div><span>{side === 'american' ? placing ? 'Place ships here' : 'Your positions are visible' : state.winner ? 'Fleet revealed' : placing ? 'Hidden fleet' : state.phase === 'american' ? 'Select a square to attack' : 'Awaiting your turn'}</span></div>
-      <GameBoard side={side} cells={boardView(state, side)} enabled={side === 'american' ? placing && !!pending : state.phase === 'american'} placing={side === 'american' && placing} preview={side === 'american' ? preview : []} previewValid={previewValid} onHover={side === 'american' ? setHover : undefined} onChoose={side === 'american' ? place : position => dispatch({ type: 'attack', position })} />
-      <ul className="fleet-manifest" aria-label={`${side} ship status`}>{SHIPS.map(ship => {
-        const placed = state.boards[side].ships.find(s => s.class === ship.class);
-        const sunk = placed && isSunk(placed, state.boards[side]);
-        return <li key={ship.class}><span>{ship.label} <small>({ship.length})</small></span><span className={sunk ? 'sunk-label' : ''}>{sunk ? 'Sunk' : placed ? placing && side === 'american' ? 'Placed' : 'Afloat' : 'Not placed'}</span></li>;
-      })}</ul>
-    </section>)}</div>
-    <div className="shot-legend" aria-label="Chart symbols"><span><i className="legend-water" /> Unexplored water</span><span><i className="legend-ship" /> Friendly / revealed ship</span><span><b className="legend-hit">×</b> Hit</span><span><b className="legend-miss">•</b> Miss</span><span><i className="legend-sunk" /> Sunk ship</span></div>
-    <div className="battle-bottom"><section className="activity" aria-label="Combat event log"><h2>Combat event log</h2><ol>{state.log.map((entry, i) => <li key={i}>{entry}</li>)}</ol></section><section className="battle-instructions"><h2>Commander's notes</h2><p>{placing ? 'Place ships horizontally or vertically. Use Orientation to rotate the next ship, or Randomize Fleet to place all three.' : 'Attack British Waters once per turn. Hits do not grant an extra turn. The British computer then attacks your fleet.'}</p><p>Use Tab to focus a square and Enter or Space to select it. Arrow keys move between available squares.</p><p className="fine">{gameplayNote}</p><details className="research-details"><summary>Still to come</summary><p className="fine">{upcomingNote}</p></details></section></div>
+    <div className="command-status"><div><span className="eyebrow">{campaign.status !== 'playing' ? 'ENGAGEMENT COMPLETE' : game.phase === 'american' ? 'REVOLUTIONARY ALLIANCE COMMAND' : game.phase === 'british' ? 'BRITISH COMMAND' : 'RESOLVING TURN'}</span><strong>Turn {game.round} / {game.scenario.roundLimit}</strong><span>{game.orders} of 3 orders remaining</span></div><div className="order-meter" aria-hidden="true">{[0, 1, 2].map(n => <span key={n} className={n < game.orders ? 'available' : ''} />)}</div><button className="primary" disabled={!playerTurn} onClick={() => { dispatch({ type: 'end-turn', revision: campaign.revision }); setMode(null); }}>End Turn</button></div>
+    <div className="campaign-legend"><span className="american"><i /> American Navy</span><span className="privateer"><i /> American Privateers</span>{definition.fleet.french > 0 && <span className="french"><i /> French Allies</span>}<span className="british"><i /> British Warships</span>{definition.fleet.merchants > 0 && <span className="merchant"><i /> Merchant fixtures</span>}</div>
+    <p className="fine fleet-counts">Revolutionary Alliance: {unitsLeft('american')} combat vessels afloat · British: {unitsLeft('british')} warships afloat. All American and French units share three player orders.</p>
+    {definition.portBattle && <p className="port-notice">◇ Port Advantage Square: G7 · Inactive · Port control: {game.portControl}. No attack bonus or objective effect.</p>}
+    <div className="battle-layout"><div><CampaignBoard game={game} selected={selected} actions={actions} onSelect={unit => { setSelectedId(unit.id); setMode(null); }} onOrder={order} /><p className="fine chart-hint">Select a vessel, choose Move or Attack, then select a highlighted tile or target. Keyboard: Tab and Enter or Space.</p>
+      <section className="activity" aria-label="Engagement activity log"><h2>Activity log</h2><p role="status">{game.log.at(-1)}</p><ol>{game.log.map((message, i) => <li key={i}>{message}</li>)}</ol></section></div>
+      <aside aria-label="Ship information"><div className="panel-title">VESSEL INSPECTION <span>TEST VALUES</span></div><div className="ship-detail">{selected ? <><div className={`portrait ${selected.owner} ${selected.class === 'privateer' ? 'privateer' : ''} ${selected.class === 'merchantman' ? 'merchant' : ''}`}><ShipArt /><span>{classification(selected)} · {selected.status}</span></div><h2>{selected.name}</h2><p className="vessel-class">{classification(selected)} · {selected.class.replaceAll('_', ' ')}</p><p className="fine">Position: {'ABCDEFGHIJKL'[selected.position[0]]}{selected.position[1] + 1}</p>
+        <dl><div><dt>Hull</dt><dd>{selected.hp}/{selected.maxHp}</dd></div><div><dt>Movement</dt><dd>{stats[selected.class].move}<small>orthogonal tiles</small></dd></div><div><dt>Damage</dt><dd>{stats[selected.class].damage}</dd></div><div><dt>Range</dt><dd>{stats[selected.class].range}</dd></div></dl>
+        <p className="fine">Move: {selected.movedThisRound ? 'used' : 'available'} · Attack: {selected.attackedThisRound ? 'used' : 'available'}</p><div className="order-buttons"><button className="secondary" aria-pressed={mode === 'move'} disabled={!legal.some(a => a.type === 'move')} onClick={() => setMode(mode === 'move' ? null : 'move')}>Move</button><button className="secondary" aria-pressed={mode === 'attack'} disabled={!legal.some(a => a.type === 'attack')} onClick={() => setMode(mode === 'attack' ? null : 'attack')}>Attack</button></div>
+        <p className="fine">{!isCombatant(selected) ? 'Merchant fixture only. No conventional attacks, interception, or scoring.' : selected.status === 'sunk' ? 'This vessel has sunk.' : !playerTurn ? 'Orders are unavailable outside Alliance command.' : sideOf(selected.owner) === 'british' ? 'British vessels are controlled by the computer.' : !game.orders ? 'No orders remain. End your turn.' : mode ? `Select a highlighted ${mode === 'move' ? 'destination' : 'target'}.` : 'Each move or attack costs one order. Each vessel can do each once per turn.'}</p><details className="research-details"><summary>Historical notes</summary><p className="fine">Ship specifications and source notes are still to come.</p></details></> : <div className="empty"><ShipArt /><h2>Select a vessel</h2><p>Inspect its classification, hull, and available orders.</p></div>}</div></aside>
+    </div>
+    <section className="campaign-roster"><h2>Fleet roster</h2><p className="fine">Testing composition · Select any vessel to inspect it, including sunk ships.</p><div>{game.units.map(unit => <button className={`roster-unit ${unit.owner} ${unit.class === 'privateer' ? 'privateer' : ''} ${unit.class === 'merchantman' ? 'merchant' : ''}`} key={unit.id} aria-pressed={selected?.id === unit.id} onClick={() => { setSelectedId(unit.id); setMode(null); }}><strong>{unit.name}</strong><span>{classification(unit)} · {unit.status === 'sunk' ? 'Sunk' : `${unit.hp}/${unit.maxHp} hull`}</span></button>)}</div></section>
+    <details className="objectives"><summary>Later abilities <span>Not active in this version</span></summary><div>{futureAbilities.map(ability => <article key={ability.id}><h3>{ability.label}</h3><p>Reserved for Milestone 2C.</p></article>)}</div></details>
   </section>;
 }

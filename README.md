@@ -1,58 +1,57 @@
 # Revolution at Sea
 
-Single-player Battleship-style React + TypeScript + Vite game for Issa Mansour's HIST 238 final project. Phase 1 uses simplified gameplay rules, not researched ship measurements or a historical battle scenario.
+React + TypeScript + Vite game for Issa Mansour's HIST 238 final project. Milestone 2B adds three sequential engagements using the existing three-order movement engine. Fleet sizes, ship values, maps, objectives, turn limits, and points are testing rules, not historical findings.
 
-## Run locally
+## Run and check
 
-Use Node.js 24 (the same version as CI):
+Use Node.js 24:
 
 ```sh
 npm ci
 npm run dev
-```
-
-Open the URL Vite prints. Verify with:
-
-```sh
 npm test
 npm run build
 npm run lint
 npm run preview
 ```
 
-Production preview uses `/NavalPowerAmRev/`. Development uses `/`.
+Development uses `/`. Production preview uses `/NavalPowerAmRev/`.
 
-## Play
+## Campaign
 
-1. Place one American Ship of the Line (4 squares), Frigate (3), and Small Warship (2). Select each starting square; Orientation switches horizontal/vertical. Ships may touch but cannot overlap or extend outside the 10×10 board.
-2. Randomize Fleet places all three automatically. Clear Placement resets manual placement. Start Game unlocks only for a complete valid fleet.
-3. Attack one unexplored square in British Waters. A cross means hit; a dot means miss. British positions stay hidden until hit or until the game ends. Each side attacks once per turn, including after hits.
-4. Hit all squares of a ship to sink it. Sink the entire British fleet to win; lose if your fleet sinks first.
-5. New Game resets the whole match. Navigation preserves the in-memory game; page refresh resets it.
+1. Massachusetts Coast: 3 American Navy units, 2 privateers, 4 British warships, and 2 merchant fixtures. No French units.
+2. Newport, Rhode Island: 2 American Navy units, 1 privateer, 2 French allies, and 5 British warships.
+3. Chesapeake Bay: 2 American Navy units, 1 privateer, 3 French allies, and 5 British warships. Labeled Port Battle; G7 is an inactive Port Advantage Square.
 
-Mouse, touch, Tab, Enter/Space, and arrow keys are supported. Small screens stack the boards; each chart scrolls independently where needed.
+Locations and themes were supplied by the owner. These are not reconstructions of particular engagements. Each engagement starts with a fresh fleet. Campaign points and prior results carry forward; ships and damage do not.
 
-## Architecture
+Select a vessel, choose Move or Attack, then select a highlighted tile or target. The whole Revolutionary Alliance shares three orders per turn. Each ship can move once and attack once, using one order each. Movement follows orthogonal paths around land and occupied tiles. Sunk vessels free their squares. Direct damage is deterministic; attack range uses Manhattan distance and ignores intervening terrain and ships. French ships are controlled by the player in the same way as American ships.
 
-- `src/battleship/`: active pure engine, placement validation, seeded random fleet generation, configuration, state types, AI, visibility projection, and gameplay styles.
-- `src/components/GameBoard.tsx`: reusable 10×10 chart; receives visible cells only.
-- `src/screens/Battlefield.tsx`: state rendering, placement controls, turn feedback, event log, and timed AI dispatch. The reducer validates every action, including stale AI callbacks.
-- `src/data/`: instructions, gameplay disclosure, historical placeholders, and empty source registry. Source material is not fetched automatically.
-- `tests/battleship.test.ts`: Phase 1 placement, AI, visibility, complete victory/defeat, and reset tests.
-- `src/game/` and `tests/engine.test.ts`: preserved prior movement demo and its regression tests. Not imported by the active game because the new Phase 1 requirements replace its movement, order budget, and beacon objective.
+End Turn discards unused orders and lets British AI use its own three orders through the same validation functions. The AI only commands British combat ships and only attacks opposing combat ships. Merchants are selectable fixtures; they are not conventional targets, do not attack, and do not grant points. There is no commerce interception yet.
 
-British AI chooses randomly among untried coordinates. Its selection function accepts public shot history and a seed, never ship positions. Randomness is seeded for reproducible tests; runtime matches receive Web Crypto seeds.
+Testing objectives: eliminate the opposing combat fleet, or have more remaining combat hull at the turn limit. Equal hull is a draw. Limits are configurable at 10/12/14 turns. Wins, losses, and draws all allow progression to the next engagement.
 
-## Scope
+Testing score: +5 for a win, +1 per distinct British warship sunk, and +7 extra for winning Round 3. Results settle once. Restart Engagement rolls back only its current points and result; earlier results remain. Restart Campaign clears everything. Restarts require confirmation. Final results show performance across all three engagements.
 
-Phase 1 only. No privateering, blockades, French intervention, resource rewards, ship movement, campaign objectives, save/resume, accounts, backend, or in-site comments. Historical text, specifications, and citations remain placeholders. The original CSS/SVG art is provisional. Browser-local state cannot provide server-enforced secrecy against developer tools; concealed positions are excluded from rendered cell attributes and accessibility labels.
+The Port Advantage Square gives no attack bonus, double attack, control reward, or victory effect. Port control stays inactive. No special abilities, interception, capture, resource rewards, or scripted events are implemented.
 
-For Phase 2, add a separately tested historical-ability module after owner playtesting and source review. Keep ability adjudication separate from core placement/attack rules.
+## Code
+
+- `src/game/`: reused movement/pathfinding engine, types, provisional stats, combat rules, pure transitions, and deterministic British AI. American/French ownership maps to one Alliance command side. The original single-demo scenario remains for regression tests only.
+- `src/campaign/`: typed campaign state, exactly three scenario definitions, testing fleet configurations, scoring/turn limits, future ability slots, and a pure campaign reducer. Revision checks reject stale timers and double submissions. Current-engagement points are separate from prior results so retries do not inflate scores.
+- `src/components/CampaignBoard.tsx` and `src/screens/Battlefield.tsx`: active chart and campaign interface, inspection, roster, results, confirmation controls, and activity log.
+- `src/data/`: historical placeholders, source schema, instructions, and inactive feature definitions. Historical files and citation registry remain unpopulated.
+- `tests/campaign.test.ts`: campaign fleets, ownership, combat, ending conditions, transitions, scoring, retries, and inactive port checks.
+- `src/battleship/`, `src/components/GameBoard.tsx`, and `tests/battleship.test.ts`: preserved earlier single-engagement game and tests. Not imported by the active screen; Battleship targeting/placement rules conflict with this milestone's requested three-order movement system.
+
+Navigation keeps the current session in memory. Refresh resets the campaign. No save/resume, backend, accounts, or online opponent. The interface uses original CSS/SVG graphics. Mobile charts scroll horizontally inside their frames.
+
+## Historical material
+
+No research or citations were added for this milestone. Background text remains unfinished. Only owner-verified material from the approved bibliography may be integrated later. Gameplay values and scenario labels do not establish historical evidence.
 
 ## GitHub Pages
 
-The existing repository remote and workflow are preserved. Production builds use `/NavalPowerAmRev/`; no server, secrets, or new dependencies are needed. `node_modules` and `dist` remain ignored.
+Existing Git configuration and Pages workflow are preserved. Production base is `/NavalPowerAmRev/`; development base is `/`. CI runs lint, all tests, and build before deploying `dist`. `dist` and `node_modules` stay ignored.
 
-When publication is explicitly approved, review local changes, commit them, and push to `main`. The existing `.github/workflows/deploy.yml` installs dependencies, runs lint/tests/build, and deploys `dist` using official Pages actions. In the GitHub repository, Pages publishing source must be GitHub Actions. Do not force-push or replace remote history.
-
-Public URL: https://issamansour23.github.io/NavalPowerAmRev/
+Only after owner approval: commit reviewed changes and push to `main` to trigger the existing Pages workflow. No force push or repository-setting changes are needed. Local checks do not publish anything.

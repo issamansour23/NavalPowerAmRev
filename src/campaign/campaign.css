@@ -1,0 +1,66 @@
+.campaign-page { max-width: 1400px; }
+.campaign-score { min-width: 160px; border-left: 1px solid var(--line); padding-left: 24px; display: flex; flex-direction: column; }
+.campaign-score small { font-size: 9px; color: var(--muted); }
+.campaign-score small:first-child { color: var(--gold); letter-spacing: 1.5px; }
+.campaign-score strong { font: 38px/1.4 Georgia, serif; color: var(--gold); }
+.campaign-overview { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0; margin: 30px 0 24px; border: 1px solid var(--line); }
+.campaign-overview li { display: flex; gap: 15px; align-items: center; padding: 18px; border-right: 1px solid var(--line); color: var(--muted); }
+.campaign-overview li:last-child { border-right: 0; }
+.campaign-overview li.current { background: #cfaf770b; box-shadow: inset 0 -2px var(--gold); }
+.campaign-overview li > span { font: 22px Georgia, serif; color: var(--gold); }
+.campaign-overview strong { display: block; font-size: 12px; font-weight: 500; color: var(--cream); }
+.campaign-overview small { display: block; font-size: 10px; margin-top: 4px; text-transform: capitalize; }
+.port-battle-tag { display: inline-block; font: 9px Arial, sans-serif; border: 1px solid #cfaf7760; padding: 6px 10px; margin-left: 14px; color: var(--gold); letter-spacing: 1px; }
+.campaign-page .prototype-disclosure { margin: 0 0 22px; }
+.command-status { display: flex; gap: 20px; align-items: center; padding: 18px 0; border-block: 1px solid var(--line); }
+.command-status > div:first-child { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.command-status strong { font: 25px Georgia, serif; }
+.command-status > div:first-child > span:last-child { color: var(--muted); font-size: 11px; }
+.command-status .order-meter span { width: 34px; height: 4px; }
+.campaign-legend { display: flex; gap: 14px 24px; flex-wrap: wrap; padding-top: 20px; font-size: 11px; }
+.campaign-legend > span { color: var(--faction); }
+.campaign-legend i { display: inline-block; width: 7px; height: 7px; background: var(--faction); border-radius: 50%; margin-right: 6px; }
+.privateer { --faction: #d6b27f; }
+.merchant { --faction: #b8bcb4; }
+.unit.privateer { border-style: dashed; }
+.unit.merchant { border-style: dotted; }
+.fleet-counts { margin-bottom: 20px; }
+.port-notice { padding: 12px 16px; background: #cfaf7708; border: 1px solid var(--line); color: var(--gold); font-size: 11px; margin-bottom: 20px; }
+.port-reserved { box-shadow: inset 0 0 0 2px #c9ab7080; }
+.reserved-port { display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; inset: 0; color: var(--gold); font-size: 20px; line-height: 1.2; }
+.reserved-port small { font-size: 7px; }
+.campaign-results-table { overflow-x: auto; margin: 22px 0; }
+.campaign-results-table table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+.campaign-results-table caption { text-align: left; padding-bottom: 12px; color: var(--gold); }
+.campaign-results-table th, .campaign-results-table td { padding: 12px; border-bottom: 1px solid var(--line); }
+.campaign-results-table th { color: var(--gold); font-weight: 500; }
+.campaign-roster { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 24px; }
+.campaign-roster h2 { font-size: 23px; }
+.campaign-roster > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.roster-unit { text-align: left; padding: 12px 15px; border: 1px solid var(--line); border-left: 2px solid var(--faction); background: #102631; }
+.roster-unit strong { display: block; color: var(--cream); font-size: 12px; font-weight: 500; }
+.roster-unit span { color: var(--muted); font-size: 10px; }
+.roster-unit:hover, .roster-unit[aria-pressed=true] { border-color: var(--gold); background: #213b44; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media(max-width: 760px) {
+  .campaign-overview { grid-template-columns: minmax(0, 1fr); }
+  .campaign-overview li { border-right: 0; border-bottom: 1px solid var(--line); padding: 13px 16px; }
+  .campaign-overview li:last-child { border-bottom: 0; }
+  .campaign-score { min-width: 110px; padding-left: 14px; }
+  .campaign-score strong { font-size: 30px; }
+  .command-status { flex-wrap: wrap; gap: 15px; }
+  .command-status > div:first-child { flex-basis: 60%; }
+  .command-status .order-meter { margin-left: auto; }
+  .command-status > button { width: 100%; }
+  .campaign-roster > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .port-battle-tag { margin: 8px 0 0; display: table; }
+}
+@media(max-width: 380px) {
+  .campaign-score { flex-basis: 100%; border-left: 0; border-top: 1px solid var(--line); padding: 10px 0 0; }
+  .campaign-roster > div { grid-template-columns: minmax(0, 1fr); }
+}
+/* Keep real row containers for consistent keyboard and screen-reader traversal. */
+.campaign-page .campaign-chart { display: block; }
+.campaign-board-row { display: grid; grid-template-columns: 24px repeat(12, minmax(0, 1fr)); }
+.campaign-page .privateer { --faction: #d6b27f; }
+.campaign-page .merchant { --faction: #b8bcb4; }

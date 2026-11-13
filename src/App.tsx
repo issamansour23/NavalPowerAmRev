@@ -37,7 +37,7 @@ export default function App() {
           <h1>Revolution<br /><em>at Sea</em></h1>
           <p className="subtitle">The Battle for the Atlantic, 1775–1783.</p>
           <div className="gold-rule" />
-          <p className="description">Place your American fleet. Search British Waters, choose your targets, and sink the opposing fleet in a turn-based naval game.</p>
+          <p className="description">Command the Revolutionary Alliance across three naval engagements. Move your ships, choose your targets, and carry your score through the campaign.</p>
           <div className="menu-actions">
             <button className="primary" onClick={() => navigate('game')}>Play Game <span aria-hidden="true">→</span></button>
             <button className="secondary" onClick={() => navigate('instructions')}>How to Play</button>

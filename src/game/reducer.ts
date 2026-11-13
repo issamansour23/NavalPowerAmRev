@@ -3,13 +3,19 @@ import { demo } from './scenarios.ts';
 import { ORDERS, stats } from './config.ts';
 import { same } from './board.ts';
 import { isLegal } from './rules.ts';
+import { isAlive, isCombatant, sideOf } from './units.ts';
 export function createGame(scenario: Scenario = demo): GameState {
-  return { scenario: structuredClone(scenario), units: structuredClone(scenario.units), round: 1, phase: 'american', orders: ORDERS, result: null, log: ['Prototype demo started. All statistics are provisional.'] };
+  return { scenario: structuredClone(scenario), units: structuredClone(scenario.units), round: 1, phase: 'american', orders: ORDERS, result: null, portControl: 'inactive', log: ['Engagement started. Ship values and objectives are testing rules.'] };
 }
 function record(state: GameState, message: string): GameState { return { ...state, log: [...state.log, message] }; }
 function checkElimination(state: GameState): GameState {
-  if (state.units.some(u => u.owner === 'american' && u.status === 'active')) return state;
-  return record({ ...state, result: 'defeat', phase: 'finished', orders: 0 }, 'Defeat: no American vessels remain.');
+  if (state.units.some(u => sideOf(u.owner) === 'american' && isAlive(u) && isCombatant(u))) {
+    if (state.scenario.victoryRule === 'combat-and-hull' && !state.units.some(u => u.owner === 'british' && isAlive(u) && isCombatant(u))) {
+      return record({ ...state, result: 'victory', phase: 'finished', orders: 0 }, 'Victory: all British warships have been sunk. Merchant fixtures do not count toward this objective.');
+    }
+    return state;
+  }
+  return record({ ...state, result: 'defeat', phase: 'finished', orders: 0 }, 'Defeat: no Revolutionary Alliance combat vessels remain.');
 }
 export function applyAction(state: GameState, action: Action): GameState {
   if (!isLegal(state, action)) return state;
@@ -34,16 +40,22 @@ export function gameReducer(state: GameState, command: Command): GameState {
   if (command.type === 'move' || command.type === 'attack') return applyAction(state, command);
   if (command.type === 'end-phase') {
     if (command.side !== state.phase) return state;
-    if (state.phase === 'american') return record({ ...state, phase: 'british', orders: ORDERS }, 'American command ended. British AI receives three orders.');
-    if (state.phase === 'british') return record({ ...state, phase: 'operations', orders: 0 }, 'British command ended. Resolving demo objective.');
+    if (state.phase === 'american') return record({ ...state, phase: 'british', orders: ORDERS }, 'Alliance command ended. British AI receives three orders.');
+    if (state.phase === 'british') return record({ ...state, phase: 'operations', orders: 0 }, 'British command ended. Resolving the engagement objective.');
     return state;
   }
   if (state.phase !== 'operations') return state;
   const checked = checkElimination(state);
   if (checked.result) return checked;
-  if (state.units.some(u => u.owner === 'american' && u.status === 'active' && same(u.position, state.scenario.objective))) {
+  if (!state.scenario.victoryRule && state.units.some(u => u.owner === 'american' && u.status === 'active' && same(u.position, state.scenario.objective))) {
     return record({ ...state, result: 'victory', phase: 'finished' }, 'Victory: an American vessel held the demo beacon through British command.');
   }
+  if (state.round >= state.scenario.roundLimit && state.scenario.victoryRule === 'combat-and-hull') {
+    const hull = (side: 'american' | 'british') => state.units.filter(u => sideOf(u.owner) === side && isAlive(u) && isCombatant(u)).reduce((sum, u) => sum + u.hp, 0);
+    const alliance = hull('american'), british = hull('british');
+    const result = alliance > british ? 'victory' : alliance < british ? 'defeat' : 'draw';
+    return record({ ...state, result, phase: 'finished', orders: 0 }, `Turn limit reached. Remaining combat hull: Alliance ${alliance}, British ${british}. ${result === 'draw' ? 'Draw' : result === 'victory' ? 'Alliance victory' : 'British victory'}. Testing rule only.`);
+  }
   if (state.round >= state.scenario.roundLimit) return record({ ...state, result: 'defeat', phase: 'finished' }, 'Defeat: the provisional round limit expired.');
-  return record({ ...state, round: state.round + 1, phase: 'american', orders: ORDERS, units: state.units.map(u => ({ ...u, movedThisRound: false, attackedThisRound: false })) }, `Round ${state.round + 1}: American command begins.`);
+  return record({ ...state, round: state.round + 1, phase: 'american', orders: ORDERS, units: state.units.map(u => ({ ...u, movedThisRound: false, attackedThisRound: false })) }, `${state.scenario.victoryRule ? 'Turn' : 'Round'} ${state.round + 1}: Alliance command begins.`);
 }
