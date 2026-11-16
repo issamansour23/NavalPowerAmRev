@@ -44,7 +44,7 @@ test('three rounds follow the approved historical sequence and use the specified
   assert.deepEqual(engagements.map(e => e.date), ['April 1776', 'August 1778', 'September 5, 1781']);
   assert.deepEqual(engagements.map(e => e.location), ['Waters near Block Island, Rhode Island', 'Narragansett Bay and Newport, Rhode Island', 'Entrance to Chesapeake Bay, Virginia']);
   assert.equal(engagements[2].alternativeName, 'Battle of the Virginia Capes');
-  assert.match(engagements[1].historicalIntroduction, /fictionalized.*not a decisive historical/i);
+  assert.match(engagements[1].historicalIntroduction, /fictionalized.*American ships/i);
   assert.match(engagements[0].historicalIntroduction, /Esek Hopkins.*HMS Glasgow/i);
   assert.match(engagements[2].historicalIntroduction, /September 5, 1781.*de Grasse.*Thomas Graves/i);
   assert.deepEqual(engagements.map(e => e.fleet), [

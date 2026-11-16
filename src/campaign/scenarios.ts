@@ -47,7 +47,7 @@ const definitions: Omit<EngagementDefinition, 'scenario'>[] = [
     date: 'August 1778',
     location: 'Narragansett Bay and Newport, Rhode Island',
     theme: 'French intervention changes the balance of naval power',
-    historicalIntroduction: 'In August 1778, French naval forces commanded by Admiral d’Estaing threatened the British position at Newport, Rhode Island. A British squadron commanded by Admiral Lord Howe approached the area, prompting the French fleet to leave Narragansett Bay. The two fleets maneuvered against each other, but a major storm disrupted their planned engagement. Smaller naval encounters followed, and the French ultimately withdrew without securing Newport. This game round is a fictionalized naval engagement inspired by that campaign, not a decisive historical French-British fleet battle.',
+    historicalIntroduction: 'In August 1778, a French force led by Admiral d’Estaing threatened the British position in Newport, Rhode Island. A British fleet commanded by Admiral Lord Howe approached, prompting the French to leave Narragansett Bay. The feuding fleets maneuvered against one another, but a major storm disrupted their engagement. Smaller encounters followed, with the French eventually withdrawing without securing Newport. This round is fictionalized by incorporating American ships as well, but is inspired by that campaign.',
     objectiveText: 'Command Continental Navy ships and privateers alongside French allies. French Intervention grants one additional French attack each Alliance turn.',
     portBattle: false,
     fictionalized: true,

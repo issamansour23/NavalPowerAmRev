@@ -228,7 +228,6 @@ export function Battlefield() {
 
       <details className="objectives"><summary>Historical framing</summary><div>
         <article><h3>{definition.title}</h3><p>{definition.historicalIntroduction}</p></article>
-        {definition.fictionalized && <p>This game encounter is fictionalized and should not be read as a decisive historical fleet battle.</p>}
       </div></details>
     </>}
   </section>;
