@@ -6,9 +6,10 @@ export function ContentSection({ content, number, citationPlaceholder }: {
     number: number;
     citationPlaceholder?: string;
 }) {
+    const paragraphs = content.text.split(/\n\s*\n/).filter(Boolean);
     return <article>
         <span>{String(number).padStart(2, '0')}</span>
-        <div><h2>{content.title}</h2>{content.text && <p>{content.text}</p>}
+        <div><h2>{content.title}</h2>{paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
             {citationPlaceholder && <p>{citationPlaceholder}</p>}
         </div>
     </article>;
