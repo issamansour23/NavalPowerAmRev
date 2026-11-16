@@ -2,15 +2,20 @@ import type { Action, EngagementOutcome, GameState, Scenario } from '../game/typ
 export interface FleetConfiguration { americanNavy: number; privateers: number; french: number; britishWarships: number; merchants: number }
 export interface EngagementDefinition {
   number: 1 | 2 | 3;
+  title: string;
+  date: string;
   location: string;
   theme: string;
+  historicalIntroduction: string;
+  alternativeName?: string;
+  fictionalized?: boolean;
   objectiveText: string;
   portBattle: boolean;
   fleet: FleetConfiguration;
   scenario: Scenario;
 }
 export interface EngagementResult {
-  number: number; location: string; outcome: EngagementOutcome; turns: number;
+  number: number; title: string; date: string; location: string; outcome: EngagementOutcome; turns: number;
   sunkWarships: string[]; sinkPoints: number; winPoints: number; bonus: number; score: number; reason: string;
 }
 export interface CampaignState {

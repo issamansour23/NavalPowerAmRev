@@ -3,9 +3,9 @@ import { stats } from '../game/config.ts';
 import type { EngagementDefinition, FleetConfiguration } from './types.ts';
 import { portAdvantageSquare, turnLimits } from './config.ts';
 
-// Scenario locations/themes come from the owner's prompt. Layouts and force sizes are testing fixtures.
+// Historical labels and introductions are owner-provided; layouts and force sizes are game fixtures.
 function makeUnit(id: string, name: string, owner: Faction, unitClass: UnitClass, position: Position): Unit {
-  return { id, name, owner, class: unitClass, position, hp: stats[unitClass].hp, maxHp: stats[unitClass].hp, movedThisRound: false, attackedThisRound: false, status: 'active', mission: unitClass === 'merchantman' ? 'Merchant fixture — interception not implemented' : 'Testing engagement' };
+  return { id, name, owner, class: unitClass, position, hp: stats[unitClass].hp, maxHp: stats[unitClass].hp, movedThisRound: false, attackedThisRound: false, privateerRepositioned: false, status: 'active', mission: unitClass === 'merchantman' ? 'Merchant fixture — interception not implemented' : 'Testing engagement' };
 }
 function makeScenario(number: number, fleet: FleetConfiguration): Scenario {
   const units: Unit[] = [];
@@ -13,7 +13,7 @@ function makeScenario(number: number, fleet: FleetConfiguration): Scenario {
   const add = (count: number, prefix: string, owner: Faction, unitClass: UnitClass) => {
     for (let i = 0; i < count; i++) units.push(makeUnit(`e${number}-${owner}-${unitClass}-${i}`, `${prefix} ${String.fromCharCode(65 + i)}`, owner, unitClass, alliedPositions[units.length]));
   };
-  add(fleet.americanNavy, 'American Frigate', 'american', 'frigate');
+  add(fleet.americanNavy, 'Continental Frigate', 'american', 'frigate');
   add(fleet.privateers, 'Privateer', 'american', 'privateer');
   add(fleet.french, 'French Warship', 'french', 'frigate');
   for (let i = 0; i < fleet.britishWarships; i++) units.push(makeUnit(`e${number}-british-warship-${i}`, `British Warship ${String.fromCharCode(65 + i)}`, 'british', 'frigate', [8, 2 + i * 2]));
@@ -30,8 +30,40 @@ function makeScenario(number: number, fleet: FleetConfiguration): Scenario {
   };
 }
 const definitions: Omit<EngagementDefinition, 'scenario'>[] = [
-  { number: 1, location: 'Massachusetts Coast', theme: 'Privateering and British Commerce', objectiveText: 'Sink the four British warships. Merchant interception is reserved for a later version.', portBattle: false, fleet: { americanNavy: 3, privateers: 2, french: 0, britishWarships: 4, merchants: 2 } },
-  { number: 2, location: 'Newport, Rhode Island', theme: 'French Naval Intervention', objectiveText: 'Command the combined Alliance fleet against five British warships.', portBattle: false, fleet: { americanNavy: 2, privateers: 1, french: 2, britishWarships: 5, merchants: 0 } },
-  { number: 3, location: 'Chesapeake Bay', theme: 'Decisive Naval Engagement and Yorktown', objectiveText: 'Win the final engagement against five British warships. The port marker grants no advantage yet.', portBattle: true, fleet: { americanNavy: 2, privateers: 1, french: 3, britishWarships: 5, merchants: 0 } },
+  {
+    number: 1,
+    title: 'Battle of Block Island',
+    date: 'April 1776',
+    location: 'Waters near Block Island, Rhode Island',
+    theme: 'Early American naval resistance against British naval superiority',
+    historicalIntroduction: 'In April 1776, an American squadron commanded by Commodore Esek Hopkins encountered the British frigate HMS Glasgow near Block Island. The Americans seriously damaged the British ship but failed to capture it. This engagement followed the American expedition to New Providence in the Bahamas.',
+    objectiveText: 'Use Continental Navy warships and American privateers to defeat the British Royal Navy. This opening engagement introduces the campaign’s ship-combat rules.',
+    portBattle: false,
+    fleet: { americanNavy: 3, privateers: 2, french: 0, britishWarships: 4, merchants: 0 },
+  },
+  {
+    number: 2,
+    title: 'Newport Naval Campaign',
+    date: 'August 1778',
+    location: 'Narragansett Bay and Newport, Rhode Island',
+    theme: 'French intervention changes the balance of naval power',
+    historicalIntroduction: 'In August 1778, French naval forces commanded by Admiral d’Estaing threatened the British position at Newport, Rhode Island. A British squadron commanded by Admiral Lord Howe approached the area, prompting the French fleet to leave Narragansett Bay. The two fleets maneuvered against each other, but a major storm disrupted their planned engagement. Smaller naval encounters followed, and the French ultimately withdrew without securing Newport. This game round is a fictionalized naval engagement inspired by that campaign, not a decisive historical French-British fleet battle.',
+    objectiveText: 'Command Continental Navy ships and privateers alongside French allies. French Intervention grants one additional French attack each Alliance turn.',
+    portBattle: false,
+    fictionalized: true,
+    fleet: { americanNavy: 2, privateers: 1, french: 2, britishWarships: 5, merchants: 0 },
+  },
+  {
+    number: 3,
+    title: 'Battle of the Chesapeake',
+    alternativeName: 'Battle of the Virginia Capes',
+    date: 'September 5, 1781',
+    location: 'Entrance to Chesapeake Bay, Virginia',
+    theme: 'French naval superiority and strategic sea control influence the outcome at Yorktown',
+    historicalIntroduction: 'On September 5, 1781, a French fleet commanded by Admiral de Grasse confronted a British squadron under Admiral Thomas Graves near Chesapeake Bay. Neither fleet achieved a decisive tactical victory, but the French retained strategic control of the bay. This prevented the British from effectively reinforcing or evacuating General Cornwallis’s army at Yorktown and contributed directly to the American and French victory there.',
+    objectiveText: 'Control the strategic waters at the entrance to Chesapeake Bay. An Allied ship holding G7 enables Port Advantage: one two-target attack each Alliance turn. Win the engagement under the existing combat rules.',
+    portBattle: true,
+    fleet: { americanNavy: 2, privateers: 1, french: 3, britishWarships: 5, merchants: 0 },
+  },
 ];
 export const engagements: readonly EngagementDefinition[] = definitions.map(d => ({ ...d, scenario: makeScenario(d.number, d.fleet) }));

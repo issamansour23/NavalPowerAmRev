@@ -1,7 +1,7 @@
 import type { Position, Scenario, Unit, UnitClass } from './types.ts';
 import { stats } from './config.ts';
 function unit(id: string, owner: 'american' | 'british', position: Position, unitClass: UnitClass = 'frigate'): Unit {
-  return { id, name: `Mock ${owner} vessel ${id}`, owner, class: unitClass, position, hp: stats[unitClass].hp, maxHp: stats[unitClass].hp, movedThisRound: false, attackedThisRound: false, status: 'active', mission: 'Prototype demonstration' };
+  return { id, name: `Mock ${owner} vessel ${id}`, owner, class: unitClass, position, hp: stats[unitClass].hp, maxHp: stats[unitClass].hp, movedThisRound: false, attackedThisRound: false, privateerRepositioned: false, status: 'active', mission: 'Prototype demonstration' };
 }
 export const demo: Scenario = {
   id: 'prototype-2a', prototype: true, objective: [8, 5], roundLimit: 12,

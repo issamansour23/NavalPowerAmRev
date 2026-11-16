@@ -43,5 +43,17 @@ Syrett, David. The Royal Navy in American Waters, 1775–1783. Scolar Press, 198
         sourceIds: [],
         status: 'placeholder',
     },
-    { id: 'intervention', title: 'French Intervention', text: '', sourceIds: [], status: 'placeholder' },
+    {
+        id: 'intervention',
+        title: 'French Intervention',
+        text: `French naval intervention changed the balance of power during the American Revolution. In August 1778, Admiral d’Estaing’s fleet threatened the British at Newport, Rhode Island. When Admiral Lord Howe approached, the French fleet left Narragansett Bay; a storm then disrupted the fleets’ planned engagement. Smaller encounters followed, and the French withdrew without capturing Newport. The game’s Newport round is a fictionalized engagement inspired by this campaign, not a decisive historical fleet battle.
+
+On September 5, 1781, Admiral de Grasse’s French fleet met Admiral Thomas Graves’s British squadron near the entrance to Chesapeake Bay. Neither fleet won a decisive tactical victory, but the French retained strategic control of the bay. This prevented the British from effectively reinforcing or evacuating Cornwallis’s army at Yorktown and contributed directly to the allied victory there.
+
+These rounds simplify complex historical events into a naval strategy game. French Intervention is a gameplay rule, while control of the Chesapeake is presented as a strategic objective rather than a new land or siege system.
+
+Syrett, David. The Royal Navy in American Waters, 1775–1783. Scolar Press, 1989.`,
+        sourceIds: [],
+        status: 'placeholder',
+    },
 ];

@@ -19,36 +19,36 @@ Development uses `/`. Production preview uses `/NavalPowerAmRev/`.
 
 ## Campaign
 
-1. Massachusetts Coast: 3 American Navy units, 2 privateers, 4 British warships, and 2 merchant fixtures. No French units.
-2. Newport, Rhode Island: 2 American Navy units, 1 privateer, 2 French allies, and 5 British warships.
-3. Chesapeake Bay: 2 American Navy units, 1 privateer, 3 French allies, and 5 British warships. Labeled Port Battle; G7 is an inactive Port Advantage Square.
+1. **1776: Battle of Block Island** — April 1776, waters near Block Island, Rhode Island. Continental Navy ships and American privateers face the British Royal Navy; no French ships appear.
+2. **1778: Newport Naval Campaign** — August 1778, Narragansett Bay and Newport, Rhode Island. French allies join the player. This game round is explicitly a fictionalized engagement inspired by the campaign, not a decisive historical French-British fleet battle.
+3. **1781: Battle of the Chesapeake** — September 5, 1781, entrance to Chesapeake Bay, Virginia; also known as the Battle of the Virginia Capes. Allied control of G7 enables Port Advantage, representing the strategic importance of controlling the bay.
 
-Locations and themes were supplied by the owner. These are not reconstructions of particular engagements. Each engagement starts with a fresh fleet. Campaign points and prior results carry forward; ships and damage do not.
+Each round presents its own historical introduction before combat. These are simplified game engagements inspired by the historical events, not reconstructions. Each engagement starts with a fresh fleet. Campaign points and prior results carry forward; ships and damage do not.
 
-Select a vessel, choose Move or Attack, then select a highlighted tile or target. The whole Revolutionary Alliance shares three orders per turn. Each ship can move once and attack once, using one order each. Movement follows orthogonal paths around land and occupied tiles. Sunk vessels free their squares. Direct damage is deterministic; attack range uses Manhattan distance and ignores intervening terrain and ships. French ships are controlled by the player in the same way as American ships.
+Select a vessel, choose an available action, then select a highlighted tile or target. The whole Revolutionary Alliance shares three orders per turn. Each ship can move once and attack once, using one order each. American privateers may also reposition once per engagement by up to two legal orthogonal tiles for one order. Movement follows orthogonal paths around land and occupied tiles. Sunk vessels free their squares. Direct damage is deterministic; attack range uses Manhattan distance and ignores intervening terrain and ships. French ships are controlled by the player in the same way as American ships.
 
-End Turn discards unused orders and lets British AI use its own three orders through the same validation functions. The AI only commands British combat ships and only attacks opposing combat ships. Merchants are selectable fixtures; they are not conventional targets, do not attack, and do not grant points. There is no commerce interception yet.
+Starting in Round 2, French Intervention allows one French warship to make a bonus attack each Alliance turn without spending an order. In Round 3, if an Allied combat ship occupies G7, Port Advantage allows one eligible Allied ship to attack two different British ships in its range for one order, using that ship's normal attack for the turn.
+
+End Turn discards unused orders and lets British AI use its own three orders through the same validation functions. The AI only commands British combat ships and only attacks opposing combat ships.
 
 Testing objectives: eliminate the opposing combat fleet, or have more remaining combat hull at the turn limit. Equal hull is a draw. Limits are configurable at 10/12/14 turns. Wins, losses, and draws all allow progression to the next engagement.
 
 Testing score: +5 for a win, +1 per distinct British warship sunk, and +7 extra for winning Round 3. Results settle once. Restart Engagement rolls back only its current points and result; earlier results remain. Restart Campaign clears everything. Restarts require confirmation. Final results show performance across all three engagements.
 
-The Port Advantage Square gives no attack bonus, double attack, control reward, or victory effect. Port control stays inactive. No special abilities, interception, capture, resource rewards, or scripted events are implemented.
-
 ## Code
 
 - `src/game/`: reused movement/pathfinding engine, types, provisional stats, combat rules, pure transitions, and deterministic British AI. American/French ownership maps to one Alliance command side. The original single-demo scenario remains for regression tests only.
-- `src/campaign/`: typed campaign state, exactly three scenario definitions, testing fleet configurations, scoring/turn limits, future ability slots, and a pure campaign reducer. Revision checks reject stale timers and double submissions. Current-engagement points are separate from prior results so retries do not inflate scores.
+- `src/campaign/`: typed campaign state, exactly three historically labeled scenario definitions, testing fleet configurations, scoring/turn limits, and a pure campaign reducer. Revision checks reject stale timers and double submissions. Current-engagement points are separate from prior results so retries do not inflate scores.
 - `src/components/CampaignBoard.tsx` and `src/screens/Battlefield.tsx`: active chart and campaign interface, inspection, roster, results, confirmation controls, and activity log.
-- `src/data/`: historical placeholders, source schema, instructions, and inactive feature definitions. Historical files and citation registry remain unpopulated.
-- `tests/campaign.test.ts`: campaign fleets, ownership, combat, ending conditions, transitions, scoring, retries, and inactive port checks.
+- `src/data/`: historical background, source schema, and instructions.
+- `tests/campaign.test.ts`: campaign fleets, ownership, combat, abilities, ending conditions, transitions, scoring, and retries.
 - `src/battleship/`, `src/components/GameBoard.tsx`, and `tests/battleship.test.ts`: preserved earlier single-engagement game and tests. Not imported by the active screen; Battleship targeting/placement rules conflict with this milestone's requested three-order movement system.
 
 Navigation keeps the current session in memory. Refresh resets the campaign. No save/resume, backend, accounts, or online opponent. The interface uses original CSS/SVG graphics. Mobile charts scroll horizontally inside their frames.
 
 ## Historical material
 
-No research or citations were added for this milestone. Background text remains unfinished. Only owner-verified material from the approved bibliography may be integrated later. Gameplay values and scenario labels do not establish historical evidence.
+Historical Background retains the existing sourced essays and now includes French intervention context alongside each round's historical introduction. The Newport game round is explicitly fictionalized rather than presented as a decisive historical battle. Fleet values and special abilities are gameplay abstractions, not historical measurements or evidence.
 
 ## GitHub Pages
 

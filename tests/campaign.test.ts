@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createCampaign, campaignReducer } from '../src/campaign/reducer.ts';
 import { engagements } from '../src/campaign/scenarios.ts';
-import { futureAbilities, scoring } from '../src/campaign/config.ts';
+import { scoring } from '../src/campaign/config.ts';
 import { getLegalActions } from '../src/game/rules.ts';
 import { applyAction, createGame, gameReducer } from '../src/game/reducer.ts';
 import { chooseBritishAction } from '../src/game/ai.ts';
@@ -38,11 +38,17 @@ function closeCombat(): GameState {
   return game;
 }
 
-test('exactly three ordered scenario definitions with approved locations and testing fleets', () => {
+test('three rounds follow the approved historical sequence and use the specified fleets', () => {
   assert.deepEqual(engagements.map(e => e.number), [1, 2, 3]);
-  assert.deepEqual(engagements.map(e => e.location), ['Massachusetts Coast', 'Newport, Rhode Island', 'Chesapeake Bay']);
+  assert.deepEqual(engagements.map(e => e.title), ['Battle of Block Island', 'Newport Naval Campaign', 'Battle of the Chesapeake']);
+  assert.deepEqual(engagements.map(e => e.date), ['April 1776', 'August 1778', 'September 5, 1781']);
+  assert.deepEqual(engagements.map(e => e.location), ['Waters near Block Island, Rhode Island', 'Narragansett Bay and Newport, Rhode Island', 'Entrance to Chesapeake Bay, Virginia']);
+  assert.equal(engagements[2].alternativeName, 'Battle of the Virginia Capes');
+  assert.match(engagements[1].historicalIntroduction, /fictionalized.*not a decisive historical/i);
+  assert.match(engagements[0].historicalIntroduction, /Esek Hopkins.*HMS Glasgow/i);
+  assert.match(engagements[2].historicalIntroduction, /September 5, 1781.*de Grasse.*Thomas Graves/i);
   assert.deepEqual(engagements.map(e => e.fleet), [
-    { americanNavy: 3, privateers: 2, french: 0, britishWarships: 4, merchants: 2 },
+    { americanNavy: 3, privateers: 2, french: 0, britishWarships: 4, merchants: 0 },
     { americanNavy: 2, privateers: 1, french: 2, britishWarships: 5, merchants: 0 },
     { americanNavy: 2, privateers: 1, french: 3, britishWarships: 5, merchants: 0 },
   ]);
@@ -53,10 +59,30 @@ test('exactly three ordered scenario definitions with approved locations and tes
     assert.equal(units.filter(u => u.owner === 'french').length, definition.fleet.french);
     assert.equal(units.filter(u => u.owner === 'british' && isCombatant(u)).length, definition.fleet.britishWarships);
     assert.equal(units.filter(u => u.class === 'merchantman').length, definition.fleet.merchants);
+    assert.equal(units.some(u => u.class === 'merchantman' || u.class === 'transport'), false);
     assert.equal(tiles.length, 144);
     assert.equal(new Set(units.map(u => u.position.join())).size, units.length);
     assert.ok(units.every(u => tiles.some(t => t.isNavigable && same(t.position, u.position))));
   }
+});
+
+test('French Intervention grants one free French attack per Alliance turn', () => {
+  let game = closeCombat();
+  const french = game.units.find(unit => unit.owner === 'french')!;
+  const enemy = game.units.find(unit => unit.owner === 'british')!;
+  const action = getLegalActions(game).find(candidate => candidate.type === 'french-intervention' && candidate.unitId === french.id && candidate.targetId === enemy.id)!;
+  assert.ok(action);
+  game = applyAction(game, action);
+  assert.equal(game.orders, 3);
+  assert.equal(game.units.find(unit => unit.id === enemy.id)!.hp, 2);
+  assert.equal(game.frenchInterventionUsedThisTurn, true);
+  assert.equal(game.units.find(unit => unit.id === french.id)!.attackedThisRound, false);
+  assert.ok(!getLegalActions(game).some(candidate => candidate.type === 'french-intervention'));
+
+  game = gameReducer(game, { type: 'end-phase', side: 'american' });
+  game = gameReducer(game, { type: 'end-phase', side: 'british' });
+  game = gameReducer(game, { type: 'resolve' });
+  assert.equal(game.frenchInterventionUsedThisTurn, false);
 });
 
 test('French units absent in Round 1, allied and controllable in Rounds 2 and 3', () => {
@@ -108,13 +134,23 @@ test('British AI targets French opponents but never friendly units or merchants'
   assert.ok(used > 0 && used <= 3);
 });
 
-test('merchant fixtures have no attacks and cannot be conventional targets', () => {
-  const game = createGame(engagements[0].scenario);
-  const merchant = game.units.find(u => u.class === 'merchantman')!;
-  const player = game.units[0]; player.position = [merchant.position[0] - 1, merchant.position[1]];
-  assert.equal(applyAction(game, { type: 'attack', unitId: player.id, targetId: merchant.id }), game);
-  game.phase = 'british';
-  assert.ok(!getLegalActions(game).some(a => a.type === 'attack' && a.unitId === merchant.id));
+test('privateers can use their two-square reposition once per engagement', () => {
+  let game = createGame(engagements[0].scenario);
+  const privateer = game.units.find(unit => unit.class === 'privateer')!;
+  const reposition = getLegalActions(game).find(action => action.type === 'reposition' && action.unitId === privateer.id)!;
+  assert.ok(reposition);
+  game = applyAction(game, reposition);
+  const usedPrivateer = game.units.find(unit => unit.id === privateer.id)!;
+  assert.equal(usedPrivateer.privateerRepositioned, true);
+  assert.equal(usedPrivateer.movedThisRound, false);
+  assert.equal(game.orders, 2);
+  assert.ok(!getLegalActions(game).some(action => action.type === 'reposition' && action.unitId === privateer.id));
+  game = gameReducer(game, { type: 'end-phase', side: 'american' });
+  game = gameReducer(game, { type: 'end-phase', side: 'british' });
+  game = gameReducer(game, { type: 'resolve' });
+  assert.ok(!getLegalActions(game).some(action => action.type === 'reposition' && action.unitId === privateer.id));
+  const restarted = gameReducer(game, { type: 'restart' });
+  assert.equal(restarted.units.find(unit => unit.id === privateer.id)!.privateerRepositioned, false);
 });
 
 test('campaign orders enforce ownership, once-per-ship rules, collision and three-order budget', () => {
@@ -174,10 +210,10 @@ test('a British warship earns one sink point once; invalid and duplicate actions
   assert.equal(before.game.units.find(u => u.id === target.id)!.status, 'active');
 });
 
-test('result settlement is idempotent and merchants never award sink points', () => {
+test('result settlement is idempotent and only British warship sinks award sink points', () => {
   let state = createCampaign();
-  const merchant = state.game.units.find(u => u.class === 'merchantman')!;
-  merchant.hp = 0; merchant.status = 'sunk';
+  const american = state.game.units.find(u => u.owner === 'american')!;
+  american.hp = 0; american.status = 'sunk';
   state = nextTurn(state); assert.equal(state.score, 0);
   state = immediateWin(state);
   const score = state.score;
@@ -208,14 +244,50 @@ test('Restart Campaign clears every result, score and port field; revisions inva
   assert.equal(campaignReducer(state, stale), state);
 });
 
-test('port marker appears only in Round 3 and occupying it does not grant victory or extra attacks', () => {
+test('Port Advantage is a once-per-turn two-target attack unlocked by Allied control of G7', () => {
   assert.ok(!engagements[0].scenario.portAdvantage); assert.ok(!engagements[1].scenario.portAdvantage);
   assert.deepEqual(engagements[2].scenario.portAdvantage, [6, 6]);
-  let game = createGame(engagements[2].scenario);
-  game.units[0].position = [...game.scenario.portAdvantage!]; game.phase = 'operations';
+  const scenario = structuredClone(engagements[2].scenario);
+  const controller = scenario.units.find(unit => unit.owner === 'american')!;
+  const attacker = scenario.units.find(unit => unit.owner === 'american' && unit.id !== controller.id)!;
+  const [first, second] = scenario.units.filter(unit => unit.owner === 'british').slice(0, 2);
+  controller.position = [...scenario.portAdvantage!];
+  attacker.position = [5, 4];
+  first.position = [7, 4];
+  second.position = [5, 6];
+  let game = createGame(scenario);
+  assert.equal(game.portControl, 'american');
+  const action = getLegalActions(game).find(candidate => candidate.type === 'port-advantage' && candidate.unitId === attacker.id && candidate.targetIds.includes(first.id) && candidate.targetIds.includes(second.id))!;
+  assert.ok(action);
+  game = applyAction(game, action);
+  assert.equal(game.orders, 2);
+  assert.equal(game.portAdvantageUsedThisTurn, true);
+  assert.equal(game.units.find(unit => unit.id === attacker.id)!.attackedThisRound, true);
+  assert.equal(game.units.find(unit => unit.id === first.id)!.hp, first.maxHp - 2);
+  assert.equal(game.units.find(unit => unit.id === second.id)!.hp, second.maxHp - 2);
+  assert.ok(!getLegalActions(game).some(candidate => candidate.type === 'port-advantage'));
+
+  const unheld = createGame(engagements[2].scenario);
+  assert.equal(unheld.portControl, 'neutral');
+  assert.ok(!getLegalActions(unheld).some(candidate => candidate.type === 'port-advantage'));
+  assert.equal(gameReducer(unheld, { type: 'port-advantage', unitId: attacker.id, targetIds: [first.id, second.id] }), unheld);
+
+  game = gameReducer(game, { type: 'end-phase', side: 'american' });
+  game = gameReducer(game, { type: 'end-phase', side: 'british' });
   game = gameReducer(game, { type: 'resolve' });
-  assert.equal(game.result, null); assert.equal(game.portControl, 'inactive'); assert.equal(game.orders, 3);
-  assert.ok(getLegalActions(game).every(a => a.type === 'move' || a.type === 'attack'));
+  assert.equal(game.portAdvantageUsedThisTurn, false);
+  assert.equal(game.portControl, 'american');
+});
+
+test('moving an Allied combat ship onto G7 immediately establishes Port Advantage control', () => {
+  const scenario = structuredClone(engagements[2].scenario);
+  const controller = scenario.units.find(unit => unit.owner === 'american')!;
+  controller.position = [5, 6];
+  const game = createGame(scenario);
+  assert.equal(game.portControl, 'neutral');
+  const move = getLegalActions(game).find(action => action.type === 'move' && action.unitId === controller.id && same(action.to, [6, 6]))!;
+  assert.ok(move);
+  assert.equal(applyAction(game, move).portControl, 'american');
 });
 
 test('timeout victory, defeat and draw are deterministic and exclude merchants', () => {
@@ -229,11 +301,13 @@ test('timeout victory, defeat and draw are deterministic and exclude merchants',
   }
 });
 
-test('no active action/configuration defines the removed mechanic or future abilities', () => {
-  const text = JSON.stringify({ engagements, futureAbilities, scoring }).toLowerCase();
+test('three engagement fleets contain no merchant or transport vessels', () => {
+  const text = JSON.stringify({ engagements, scoring }).toLowerCase();
   assert.ok(!text.includes('blockade'));
-  assert.ok(futureAbilities.every(a => a.status === 'reserved-for-2c'));
-  for (const definition of engagements) assert.ok(getLegalActions(createGame(definition.scenario)).every(a => a.type === 'move' || a.type === 'attack'));
+  for (const definition of engagements) {
+    assert.ok(!definition.scenario.units.some(unit => unit.class === 'merchantman' || unit.class === 'transport'));
+    assert.ok(getLegalActions(createGame(definition.scenario)).every(action => ['move', 'reposition', 'attack', 'french-intervention', 'port-advantage'].includes(action.type)));
+  }
 });
 
 test('duplicate transition and end-turn commands cannot skip scenarios or AI phases', () => {

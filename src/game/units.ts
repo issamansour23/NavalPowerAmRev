@@ -7,5 +7,5 @@ export function classification(unit: Unit): string {
   if (unit.class === 'merchantman') return 'British Merchant';
   if (unit.class === 'privateer') return 'American Privateer';
   if (unit.owner === 'french') return 'French Ally';
-  return unit.owner === 'british' ? 'British Warship' : 'American Navy';
+  return unit.owner === 'british' ? 'British Warship' : 'Continental Navy';
 }

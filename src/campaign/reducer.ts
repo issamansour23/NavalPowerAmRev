@@ -19,7 +19,8 @@ function settle(state: CampaignState): CampaignState {
   const bonus = state.game.result === 'victory' && definition.number === 3 ? scoring.chesapeakeWinBonus : 0;
   next = { ...next, score: next.score + winPoints + bonus, currentScore: next.currentScore + winPoints + bonus };
   const result: EngagementResult = {
-    number: definition.number, location: definition.location, outcome: state.game.result, turns: state.game.round,
+    number: definition.number, title: definition.title, date: definition.date, location: definition.location,
+    outcome: state.game.result, turns: state.game.round,
     sunkWarships: [...next.creditedSinks], sinkPoints: next.creditedSinks.length * scoring.britishWarshipSunk,
     winPoints, bonus, score: next.currentScore, reason: state.game.log.at(-1) ?? '',
   };

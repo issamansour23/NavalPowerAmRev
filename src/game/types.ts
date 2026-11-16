@@ -7,9 +7,15 @@ export interface Tile { id: string; position: Position; type: 'sea' | 'land' | '
 export interface Unit {
   id: string; name: string; owner: Faction; class: UnitClass; position: Position;
   hp: number; maxHp: number; movedThisRound: boolean; attackedThisRound: boolean;
+  privateerRepositioned: boolean;
   status: 'active' | 'sunk'; mission: string; cargo?: number;
 }
-export type Action = { type: 'move'; unitId: string; to: Position } | { type: 'attack'; unitId: string; targetId: string };
+export type Action =
+  | { type: 'move'; unitId: string; to: Position }
+  | { type: 'reposition'; unitId: string; to: Position }
+  | { type: 'attack'; unitId: string; targetId: string }
+  | { type: 'french-intervention'; unitId: string; targetId: string }
+  | { type: 'port-advantage'; unitId: string; targetIds: [string, string] };
 export interface Scenario {
   id: string; prototype: true; tiles: Tile[]; units: Unit[]; objective: Position; roundLimit: number;
   victoryRule?: 'combat-and-hull';
@@ -19,7 +25,9 @@ export type EngagementOutcome = 'victory' | 'defeat' | 'draw';
 export interface GameState {
   scenario: Scenario; units: Unit[]; round: number; phase: Side | 'operations' | 'finished';
   orders: number; result: EngagementOutcome | null; log: string[];
-  /** Reserved for future port rules. Never changed by Milestone 2B actions. */
+  /** Side holding the strategic square, neutral if unoccupied, or inactive outside Round 3. */
   portControl: 'inactive' | 'neutral' | Side | 'contested';
+  frenchInterventionUsedThisTurn: boolean;
+  portAdvantageUsedThisTurn: boolean;
 }
 export type Command = Action | { type: 'end-phase'; side: Side } | { type: 'resolve' } | { type: 'restart' };
