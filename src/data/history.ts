@@ -2,8 +2,6 @@ import type { HistoricalContent } from './sources';
 
 export const historicalPage = {
     title: 'Historical Background',
-    introduction: 'Background notes are still in progress. These are the topics this section will cover.',
-    sourceNotice: 'Sources will be listed here alongside the finished notes.',
 };
 
 export const history: HistoricalContent[] = [
@@ -45,5 +43,5 @@ Syrett, David. The Royal Navy in American Waters, 1775–1783. Scolar Press, 198
         sourceIds: [],
         status: 'placeholder',
     },
-    { id: 'intervention', title: 'French intervention', text: '', sourceIds: [], status: 'placeholder' },
+    { id: 'intervention', title: 'French Intervention', text: '', sourceIds: [], status: 'placeholder' },
 ];
