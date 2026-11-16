@@ -141,6 +141,16 @@ nav button[aria-current] { border-bottom-color: var(--gold); }
 .parchment h2 { font-size: 25px; margin-bottom: 12px; }
 .parchment p { font-size: 14px; line-height: 1.9; color: #485253; }
 .parchment p + p { margin-top: 16px; }
+.history-topics { display: grid; gap: 0; }
+.history-topic { display: grid; grid-template-columns: 42px 1fr 24px; align-items: center; gap: 16px; width: 100%; padding: 24px 4px; border: 0; border-bottom: 1px solid #81704740; background: transparent; color: #26353a; text-align: left; cursor: pointer; }
+.history-topic:first-child { border-top: 1px solid #81704740; }
+.history-topic > span:first-child { color: #887346; font: 19px Georgia, serif; }
+.history-topic strong { font: 23px Georgia, 'Times New Roman', serif; font-weight: 400; }
+.history-topic > span:last-child { color: #887346; font-size: 20px; transition: transform .18s; }
+.history-topic:hover > span:last-child { transform: translateX(4px); }
+.history-topic:focus-visible, .history-back:focus-visible { outline: 2px solid #887346; outline-offset: 3px; }
+.history-back { margin: 12px 0 20px; padding: 8px 0; border: 0; background: transparent; color: #5b523e; font: 14px 'Helvetica Neue', Arial, sans-serif; cursor: pointer; }
+.history-back:hover { color: #26353a; text-decoration: underline; }
 .reading { padding-top: 24px; }
 .reading h3 { font-size: 20px; margin-bottom: 10px; }
 .reading p { font-size: 12px; }
