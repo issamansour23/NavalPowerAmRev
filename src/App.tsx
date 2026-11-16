@@ -45,10 +45,9 @@ export default function App() {
           </div>
           <p className="prototype-note"><span className="status-dot" /> EARLY VERSION</p>
         </div>
-        <div className="hero-bottom"><span>01 / THE WAR AT SEA</span><p>A HIST 238 final project</p><span>1775 — 1783</span></div>
+        <div className="hero-bottom"><span>01 / THE WAR AT SEA</span><p>HIST 238 Final Project</p><span>1775 — 1783</span></div>
       </section> : screen === 'game' ? null : <Information kind={screen} onPlay={() => navigate('game')} />}
       <div hidden={screen !== 'game'}><Battlefield /></div>
     </main>
-    <footer className="site-footer"><span>REVOLUTION AT SEA</span><span>Issa Mansour - Hist 238 Final</span><span>Work in progress</span></footer>
   </div>;
 }
