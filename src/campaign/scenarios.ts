@@ -60,7 +60,7 @@ const definitions: Omit<EngagementDefinition, 'scenario'>[] = [
     date: 'September 5, 1781',
     location: 'Entrance to Chesapeake Bay, Virginia',
     theme: 'French naval superiority and strategic sea control influence the outcome at Yorktown',
-    historicalIntroduction: 'On September 5, 1781, a French fleet commanded by Admiral de Grasse confronted a British squadron under Admiral Thomas Graves near Chesapeake Bay. Neither fleet achieved a decisive tactical victory, but the French retained strategic control of the bay. This prevented the British from effectively reinforcing or evacuating General Cornwallis’s army at Yorktown and contributed directly to the American and French victory there.',
+    historicalIntroduction: 'On September 5, 1781, a French fleet led by Admiral de Grasse, anchored at the mouth of Chesapeake Bay, confronted a British squadron under the command of Admiral Thomas Graves. Neither fleet was able to secure a decisive victory, but the French retained strategic control of the bay, preventing the British from effectively reinforcing or evacuating General Cornwallis’s army at Yorktown and contributing directly to the American and French victory.',
     objectiveText: 'Control the strategic waters at the entrance to Chesapeake Bay. An Allied ship holding G7 enables Port Advantage: one two-target attack each Alliance turn. Win the engagement under the existing combat rules.',
     portBattle: true,
     fleet: { americanNavy: 2, privateers: 1, french: 3, britishWarships: 5, merchants: 0 },

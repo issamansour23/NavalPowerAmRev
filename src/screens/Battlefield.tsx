@@ -76,7 +76,7 @@ export function Battlefield() {
         <h1>{definition.title}</h1>
         <p>{definition.date} · {definition.location}{definition.alternativeName && ` · Also known as the ${definition.alternativeName}`}{definition.portBattle && <span className="port-battle-tag">STRATEGIC SEA CONTROL</span>}</p>
       </div>
-      <div className="campaign-score"><small>CAMPAIGN SCORE</small><strong>{campaign.score}</strong><small>Provisional game points</small></div>
+      <div className="campaign-score"><small>CAMPAIGN SCORE</small><strong>{campaign.score}</strong><small>Game Points</small></div>
     </div>
 
     <ol className="campaign-overview" aria-label="Campaign engagements">
@@ -92,7 +92,7 @@ export function Battlefield() {
     {showBriefing && campaign.status === 'playing' ? <section className="round-briefing" aria-labelledby="round-briefing-title">
       <p className="eyebrow">HISTORICAL INTRODUCTION · {definition.date}</p>
       <h2 id="round-briefing-title">{definition.title}</h2>
-      {definition.alternativeName && <p className="fine">Also known as the {definition.alternativeName}</p>}
+      {definition.alternativeName && <p className="fine">AKA: {definition.alternativeName}</p>}
       <p>{definition.historicalIntroduction}</p>
       <button className="primary" onClick={() => setShowBriefing(false)}>Begin Battle</button>
     </section> : <>
