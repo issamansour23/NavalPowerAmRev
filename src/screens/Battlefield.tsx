@@ -99,7 +99,6 @@ export function Battlefield() {
       <h2 id="round-briefing-title">{definition.title}</h2>
       {definition.alternativeName && <p className="fine">Also known as the {definition.alternativeName}</p>}
       <p>{definition.historicalIntroduction}</p>
-      <p className="fine">Game objective: {definition.objectiveText}</p>
       <button className="primary" onClick={() => setShowBriefing(false)}>Begin Battle</button>
     </section> : <>
       <div className="game-toolbar">

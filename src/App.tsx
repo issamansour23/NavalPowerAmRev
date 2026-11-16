@@ -42,7 +42,7 @@ export default function App() {
             <button className="text-button" onClick={() => navigate('history')}>Historical Background <span aria-hidden="true">↗</span></button>
           </div>
         </div>
-        <div className="hero-bottom"><span>01 / THE WAR AT SEA</span><p>HIST 238 Final Project</p><span>1775 — 1783</span></div>
+        <div className="hero-bottom"><span>Issa Mansour</span><p>HIST 238 Final Project</p><span>1775 — 1783</span></div>
       </section> : screen === 'game' ? null : <Information kind={screen} onPlay={() => navigate('game')} />}
       <div hidden={screen !== 'game'}><Battlefield /></div>
     </main>
