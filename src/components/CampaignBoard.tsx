@@ -35,7 +35,7 @@ export function CampaignBoard({ game, selected, actions, portTargetId, onSelect,
         </div>;
       })}</div>)}
     </div>
-    <div className="board-caption"><span>Testing chart · Full fleet visibility</span><span>Not a historical map</span></div>
+    <div className="board-caption"><span>Not a historical map</span></div>
     {selected && <span className="sr-only">Selected vessel at {'ABCDEFGHIJKL'[selected.position[0]]}{selected.position[1] + 1}.</span>}
   </div>;
 }

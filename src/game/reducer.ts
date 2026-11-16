@@ -9,7 +9,7 @@ export function createGame(scenario: Scenario = demo): GameState {
     scenario: structuredClone(scenario), units: structuredClone(scenario.units), round: 1, phase: 'american',
     orders: ORDERS, result: null, portControl: scenario.portAdvantage ? 'neutral' : 'inactive',
     frenchInterventionUsedThisTurn: false, portAdvantageUsedThisTurn: false,
-    log: ['Engagement started. Ship values and objectives are game rules, not historical measurements.'],
+    log: [],
   };
   return updatePortControl(game);
 }
@@ -83,7 +83,7 @@ export function gameReducer(state: GameState, command: Command): GameState {
     const hull = (side: 'american' | 'british') => state.units.filter(u => sideOf(u.owner) === side && isAlive(u) && isCombatant(u)).reduce((sum, u) => sum + u.hp, 0);
     const alliance = hull('american'), british = hull('british');
     const result = alliance > british ? 'victory' : alliance < british ? 'defeat' : 'draw';
-    return record({ ...state, result, phase: 'finished', orders: 0 }, `Turn limit reached. Remaining combat hull: Alliance ${alliance}, British ${british}. ${result === 'draw' ? 'Draw' : result === 'victory' ? 'Alliance victory' : 'British victory'}. Testing rule only.`);
+    return record({ ...state, result, phase: 'finished', orders: 0 }, `Turn limit reached. Remaining combat hull: Alliance ${alliance}, British ${british}. ${result === 'draw' ? 'Draw' : result === 'victory' ? 'Alliance victory' : 'British victory'}.`);
   }
   if (state.round >= state.scenario.roundLimit) return record({ ...state, result: 'defeat', phase: 'finished' }, 'Defeat: the provisional round limit expired.');
   const next = updatePortControl({

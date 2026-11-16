@@ -3,10 +3,9 @@ import { CampaignBoard } from '../components/CampaignBoard';
 import { ShipArt } from '../components/ShipArt';
 import { createCampaign, campaignReducer } from '../campaign/reducer';
 import { engagements } from '../campaign/scenarios';
-import { scoring } from '../campaign/config';
 import { getLegalActions } from '../game/rules';
 import { stats } from '../game/config';
-import { classification, isAlive, isCombatant, sideOf } from '../game/units';
+import { classification, isCombatant, sideOf } from '../game/units';
 import type { Action, Unit } from '../game/types';
 import '../campaign/campaign.css';
 
@@ -70,9 +69,6 @@ export function Battlefield() {
     else setPortTargetId(target.id);
   }
 
-  const unitsLeft = (side: 'american' | 'british') =>
-    game.units.filter(unit => sideOf(unit.owner) === side && isAlive(unit) && isCombatant(unit)).length;
-
   return <section className="page campaign-page">
     <div className="page-heading">
       <div>
@@ -104,17 +100,10 @@ export function Battlefield() {
         <div className="mission-brief">
           <span className="eyebrow">ENGAGEMENT OBJECTIVE</span>
           <p>{definition.objectiveText}</p>
-          <small>At turn {game.scenario.roundLimit}, more remaining combat hull wins; equal hull is a draw.</small>
         </div>
         <button className="secondary" onClick={() => setConfirm('engagement')}>Restart Engagement</button>
         <button className="secondary" onClick={() => setConfirm('campaign')}>Restart Campaign</button>
       </div>
-
-      <details className="prototype-disclosure">
-        <summary>About the game rules</summary>
-        <p>Fleet sizes, positions, hull, movement, damage, turn limits, and scores are simplified game rules, not historical measurements. Attack ranges follow each ship’s listed range. All fleets are visible. Round 2 is a fictionalized engagement inspired by the Newport Naval Campaign, not a decisive historical fleet battle.</p>
-        <p>Scoring: +{scoring.engagementWin} for a win, +{scoring.britishWarshipSunk} per British warship sunk, and +{scoring.chesapeakeWinBonus} for a Round 3 win. Fresh fleets start each engagement; scores carry forward. Restart Engagement discards only that engagement's points.</p>
-      </details>
 
       {confirm && <div className="notice" role="alert">
         <p>{confirm === 'campaign' ? 'Restart the whole campaign? All results and points will be cleared.' : 'Restart this engagement? Its points and result will be cleared. Earlier results will stay.'}</p>
@@ -168,7 +157,6 @@ export function Battlefield() {
         {definition.fleet.french > 0 && <span className="french"><i /> French Allies</span>}
         <span className="british"><i /> British Warships</span>
       </div>
-      <p className="fine fleet-counts">Revolutionary Alliance: {unitsLeft('american')} combat vessels afloat · British: {unitsLeft('british')} warships afloat. All American and French units share three player orders.</p>
       {definition.portBattle && <p className="port-notice">◇ Port Advantage Square: G7 · Control: {game.portControl}. {game.portControl === 'american' ? 'An eligible Allied ship can attack two different British ships in range once this turn.' : 'Move an Allied combat ship onto G7 to enable Port Advantage.'}</p>}
 
       <div className="battle-layout">
@@ -184,7 +172,7 @@ export function Battlefield() {
           />
           <p className="fine chart-hint">Select a vessel, choose an available action, then select highlighted tiles or targets. Keyboard: Tab and Enter or Space.</p>
           <section className="activity" aria-label="Engagement activity log">
-            <h2>Activity log</h2><p role="status">{game.log.at(-1)}</p>
+            <h2>Activity log</h2>{game.log.at(-1) && <p role="status">{game.log.at(-1)}</p>}
             <ol>{game.log.map((message, index) => <li key={index}>{message}</li>)}</ol>
           </section>
         </div>
@@ -228,7 +216,7 @@ export function Battlefield() {
       </div>
 
       <section className="campaign-roster">
-        <h2>Fleet roster</h2><p className="fine">Testing composition · Select any vessel to inspect it, including sunk ships.</p>
+        <h2>Fleet roster</h2><p className="fine">Select any vessel to inspect its details, including sunk ships.</p>
         <div>{game.units.map(unit => <button className={`roster-unit ${unit.owner} ${unit.class === 'privateer' ? 'privateer' : ''} ${unit.class === 'merchantman' ? 'merchant' : ''}`} key={unit.id} aria-pressed={selected?.id === unit.id} onClick={() => {
           setSelectedId(unit.id);
           setMode(null);

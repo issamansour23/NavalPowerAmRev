@@ -53,10 +53,6 @@ nav button[aria-current] { border-bottom-color: var(--gold); }
 .order-meter { display: flex; gap: 5px; margin: 5px 0 7px; }
 .order-meter span { width: 26px; height: 3px; background: #40515a; }
 .order-meter .available { background: var(--gold); }
-.prototype-disclosure { margin-top: 26px; border-block: 1px solid var(--line); color: var(--muted); font-size: 11px; }
-.prototype-disclosure summary { padding: 12px 0; }
-.prototype-disclosure .status-dot { margin: 0 7px; }
-.prototype-disclosure p { padding: 0 16px 16px; max-width: 800px; }
 .legend { display: flex; gap: 24px; flex-wrap: wrap; padding: 20px 0; font-size: 11px; }
 .american { --faction: #8dc6bb; }
 .british { --faction: #e69e91; }
