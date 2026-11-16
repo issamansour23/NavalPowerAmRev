@@ -31,7 +31,7 @@ export default function App() {
     </header>
     <main id="main-content" tabIndex={-1}>
       {screen === 'menu' ? <section className="hero">
-        <div className="hero-chart" aria-hidden="true"><div className="chart-rings" /><span className="chart-word">THE NORTH ATLANTIC</span><ShipArt /><span className="chart-coordinate">REVOLUTION AT SEA</span></div>
+        <div className="hero-chart" aria-hidden="true"><div className="chart-rings" /><span className="chart-word">THE NORTH ATLANTIC</span><ShipArt /></div>
         <div className="hero-copy">
           <h1>Revolution<br /><em>at Sea</em></h1>
           <p className="subtitle">The Battle for the Atlantic, 1775–1783.</p>
