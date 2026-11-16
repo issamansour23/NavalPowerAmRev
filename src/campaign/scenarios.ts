@@ -36,7 +36,7 @@ const definitions: Omit<EngagementDefinition, 'scenario'>[] = [
     date: 'April 1776',
     location: 'Waters near Block Island, Rhode Island',
     theme: 'Early American naval resistance against British naval superiority',
-    historicalIntroduction: 'In April 1776, an American squadron of ships led by Commodore Esek Hopkins encountered the British Frigate HMS Glasgow near Block Island. The Americans, on their return from the Bahamas, seriously damaged the British ship,  but were unable to capture it.',
+    historicalIntroduction: 'In April 1776, an American squadron led by Commodore Esek Hopkins encountered the British frigate HMS Glasgow near Block Island. Returning from the Bahamas, the Americans seriously damaged the British ship but were unable to capture it.',
     objectiveText: 'Use Continental Navy warships and American privateers to defeat the British Royal Navy. This opening engagement introduces the campaign’s ship-combat rules.',
     portBattle: false,
     fleet: { americanNavy: 3, privateers: 2, french: 0, britishWarships: 4, merchants: 0 },
