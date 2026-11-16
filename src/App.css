@@ -142,6 +142,7 @@ nav button[aria-current] { border-bottom-color: var(--gold); }
 .parchment article > span { color: #887346; font: 19px Georgia, serif; padding-top: 5px; }
 .parchment h2 { font-size: 25px; margin-bottom: 12px; }
 .parchment p { font-size: 14px; line-height: 1.9; color: #485253; }
+.parchment p + p { margin-top: 16px; }
 .reading { padding-top: 24px; }
 .reading h3 { font-size: 20px; margin-bottom: 10px; }
 .reading p { font-size: 12px; }
