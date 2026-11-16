@@ -12,9 +12,7 @@ export function Information({ kind, onPlay }: {
     const selectedTopic = history.find(section => section.id === selectedTopicId);
 
     return <section className="page information">
-        {!historical && <p className="eyebrow">HOW TO PLAY</p>}
         <h1>{historical ? historicalPage.title : 'How to Play'}</h1>
-        {!historical && <p className="lead">Place your fleet, search enemy waters, and learn the rules of Revolution at Sea.</p>}
         <div className="parchment">
             {historical ? selectedTopic ? <>
                 <button className="history-back" onClick={() => setSelectedTopicId(null)}>← All topics</button>
