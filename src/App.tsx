@@ -27,7 +27,6 @@ export default function App() {
         <span>REVOLUTION<br /><b>AT SEA</b></span>
       </button>
       <nav aria-label="Main navigation">{navigation.map(item => <button key={item.id} aria-current={screen === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}>{item.label}</button>)}</nav>
-      <span className="edition">A STRATEGY GAME IN DEVELOPMENT</span>
     </header>
     <main id="main-content" tabIndex={-1}>
       {screen === 'menu' ? <section className="hero">

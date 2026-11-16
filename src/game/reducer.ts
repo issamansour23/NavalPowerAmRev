@@ -85,7 +85,7 @@ export function gameReducer(state: GameState, command: Command): GameState {
     const result = alliance > british ? 'victory' : alliance < british ? 'defeat' : 'draw';
     return record({ ...state, result, phase: 'finished', orders: 0 }, `Turn limit reached. Remaining combat hull: Alliance ${alliance}, British ${british}. ${result === 'draw' ? 'Draw' : result === 'victory' ? 'Alliance victory' : 'British victory'}.`);
   }
-  if (state.round >= state.scenario.roundLimit) return record({ ...state, result: 'defeat', phase: 'finished' }, 'Defeat: the provisional round limit expired.');
+  if (state.round >= state.scenario.roundLimit) return record({ ...state, result: 'defeat', phase: 'finished' }, 'Defeat: the round limit expired.');
   const next = updatePortControl({
     ...state,
     round: state.round + 1,
