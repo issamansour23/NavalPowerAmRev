@@ -78,8 +78,7 @@ export function Battlefield() {
       <div>
         <p className="eyebrow">THREE-ROUND CAMPAIGN · ROUND {definition.number} OF 3</p>
         <h1>{definition.title}</h1>
-        <p>{definition.date} · {definition.location}{definition.alternativeName && ` · Also known as the ${definition.alternativeName}`}</p>
-        <p>{definition.theme}{definition.portBattle && <span className="port-battle-tag">STRATEGIC SEA CONTROL</span>}</p>
+        <p>{definition.date} · {definition.location}{definition.alternativeName && ` · Also known as the ${definition.alternativeName}`}{definition.portBattle && <span className="port-battle-tag">STRATEGIC SEA CONTROL</span>}</p>
       </div>
       <div className="campaign-score"><small>CAMPAIGN SCORE</small><strong>{campaign.score}</strong><small>Provisional game points</small></div>
     </div>
