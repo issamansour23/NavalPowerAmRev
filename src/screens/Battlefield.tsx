@@ -157,7 +157,7 @@ export function Battlefield() {
         {definition.fleet.french > 0 && <span className="french"><i /> French Allies</span>}
         <span className="british"><i /> British Warships</span>
       </div>
-      {definition.portBattle && <p className="port-notice">◇ Port Advantage Square: G7 · Control: {game.portControl}. {game.portControl === 'american' ? 'An eligible Allied ship can attack two different British ships in range once this turn.' : 'Move an Allied combat ship onto G7 to enable Port Advantage.'}</p>}
+      {definition.portBattle && <p className="port-notice">◇ Port Advantage Square: Take control to activate Port Advantage ability</p>}
 
       <div className="battle-layout">
         <div>
