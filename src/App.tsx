@@ -33,17 +33,14 @@ export default function App() {
       {screen === 'menu' ? <section className="hero">
         <div className="hero-chart" aria-hidden="true"><div className="chart-rings" /><span className="chart-word">THE NORTH ATLANTIC</span><ShipArt /><span className="chart-coordinate">REVOLUTION AT SEA</span></div>
         <div className="hero-copy">
-          <p className="eyebrow">A MARITIME STRATEGY EXPERIENCE</p>
           <h1>Revolution<br /><em>at Sea</em></h1>
           <p className="subtitle">The Battle for the Atlantic, 1775–1783.</p>
           <div className="gold-rule" />
-          <p className="description">Command the Revolutionary Alliance across three naval engagements. Move your ships, choose your targets, and carry your score through the campaign.</p>
           <div className="menu-actions">
             <button className="primary" onClick={() => navigate('game')}>Play Game <span aria-hidden="true">→</span></button>
             <button className="secondary" onClick={() => navigate('instructions')}>How to Play</button>
             <button className="text-button" onClick={() => navigate('history')}>Historical Background <span aria-hidden="true">↗</span></button>
           </div>
-          <p className="prototype-note"><span className="status-dot" /> EARLY VERSION</p>
         </div>
         <div className="hero-bottom"><span>01 / THE WAR AT SEA</span><p>HIST 238 Final Project</p><span>1775 — 1783</span></div>
       </section> : screen === 'game' ? null : <Information kind={screen} onPlay={() => navigate('game')} />}

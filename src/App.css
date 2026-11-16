@@ -20,7 +20,6 @@ nav button[aria-current] { border-bottom-color: var(--gold); }
 .hero h1 em { color: var(--gold); font-weight: 400; }
 .subtitle { font: 20px/1.6 Georgia, serif; color: #d0d2ca; }
 .gold-rule { height: 1px; background: var(--gold); width: 52px; margin: 28px 0; }
-.description { color: var(--muted); max-width: 390px; font-size: 14px; line-height: 1.9; }
 .menu-actions { display: flex; flex-wrap: wrap; gap: 12px; max-width: 400px; margin-top: 30px; }
 .primary, .secondary { padding: 13px 22px; min-height: 46px; font-size: 12px; border: 1px solid #c6a77280; transition: background .18s, border-color .18s; }
 .primary { background: var(--gold); color: #10232e; font-weight: 600; border-color: var(--gold); }
@@ -31,7 +30,6 @@ nav button[aria-current] { border-bottom-color: var(--gold); }
 .text-button { flex-basis: 100%; padding: 10px 0; text-align: left; font-size: 12px; border: 0; background: none; color: #c7c7bb; }
 .text-button span { color: var(--gold); margin-left: 10px; }
 .text-button:hover { color: var(--gold); }
-.prototype-note { display: flex; gap: 9px; align-items: center; margin: 26px 0 46px; font-size: 9px; letter-spacing: 1.3px; color: var(--muted); }
 .status-dot { display: inline-block; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
 .note-divider { opacity: .4; margin: 0 3px; }
 .hero-chart { position: absolute; top: 30px; right: -3%; width: 62%; height: 620px; color: #b7b89e; opacity: .65; pointer-events: none; }
@@ -159,11 +157,9 @@ nav button[aria-current] { border-bottom-color: var(--gold); }
   .hero-copy { width: 100%; }
   .hero h1 { font-size: clamp(38px, 12vw, 64px); letter-spacing: -1.5px; }
   .subtitle { font-size: 17px; }
-  .description { max-width: 350px; }
   .hero-chart { top: 30px; right: -52%; width: 115%; height: 550px; opacity: .16; }
   .chart-word, .chart-coordinate { display: none; }
   .eyebrow { font-size: 9px; letter-spacing: 1.5px; }
-  .prototype-note { flex-wrap: wrap; font-size: 8px; letter-spacing: .8px; margin-bottom: 36px; }
   .hero-bottom { align-items: flex-start; padding: 24px 0; } .hero-bottom > span { font-size: 8px; max-width: 90px; }
   .hero-bottom > span:last-child { display: none; } .hero-bottom p { font-size: 12px; max-width: 170px; }
   .page { padding: 30px 5%; } .page-heading { gap: 18px; align-items: flex-start; }
